@@ -7,6 +7,5 @@
     SQL方言问题已经成了平台层面上常见的问题，针对这类问题常见的解决思路是对外采用一致的标准SQL语法，对用户完全屏蔽底层引擎，
     通过开发一个SQL语法解析服务，将标准SQL解析成各类引擎方言，从而实现一套SQL，到处执行；
     
-## 服务架构图：![github](https://raw.githubusercontent.com/gl0726/bdp-bigdata-common/sql-parser-common/picture/struct.jpg "github")            
-
+## 服务架构图：![github](https://raw.githubusercontent.com/gl0726/bdp-bigdata-common/master/sql-parser-common/picture/struct.jpg "github")
 
