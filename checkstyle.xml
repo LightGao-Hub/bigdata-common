@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+		"-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+		"http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+
+<module name="Checker">
+	<module name="SuppressWarningsFilter" />
+	<module name="NewlineAtEndOfFile"/>
+	<module name="FileLength">
+		<property name="max" value="2000"/>
+	</module>
+
+	<module name="TreeWalker">
+		<module name="SuppressWarningsHolder" />
+		<module name="SuppressionCommentFilter">
+			<property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
+			<property name="onCommentFormat" value="CHECKSTYLE:ON"/>
+		</module>
+
+		<module name="SuppressionCommentFilter"/>
+		<!-- 注释文档检查
+		<module name="JavadocType">
+			<property name="allowUnknownTags" value="true"/>
+			<message key="javadoc.missing" value="类注释：缺少Javadoc注释。"/>
+		</module>-->
+
+		<!-- Checks for imports                              -->
+		<!-- See https://checkstyle.org/config_import.html -->
+		<module name="AvoidStarImport"/>
+		<module name="IllegalImport"/> <!-- defaults to sun.* packages -->
+		<module name="RedundantImport"/>
+		<module name="UnusedImports">
+			<property name="processJavadoc" value="false"/>
+		</module>
+		<module name="ImportOrder">
+			<property name="groups" value="/^java\./,javax,*,com.haizhi"/>
+			<property name="ordered" value="true"/>
+			<property name="separated" value="true"/>
+			<property name="option" value="top"/>
+			<property name="sortStaticImportsAlphabetically" value="true"/>
+		</module>
+
+		<!-- Checks for Naming Conventions.                  -->
+		<!-- See https://checkstyle.org/config_naming.html -->
+		<module name="ConstantName"/>
+		<module name="LocalFinalVariableName"/>
+		<module name="LocalVariableName"/>
+		<module name="MemberName"/>
+		<!--<module name="MethodName"/>-->
+		<module name="PackageName"/>
+		<module name="ParameterName"/>
+		<module name="StaticVariableName"/>
+		<module name="TypeName"/>
+
+		<!-- 长度检查 -->
+		<!-- 每行不超过150个字符 -->
+		<module name="LineLength">
+			<property name="max" value="150" />
+		</module>
+		<!-- 方法不超过50行 -->
+		<module name="MethodLength">
+			<property name="tokens" value="METHOD_DEF" />
+			<property name="max" value="50" />
+			<property name="countEmpty" value="false" />
+		</module>
+		<!-- 方法的参数个数不超过5个。 并且不对构造方法进行检查-->
+		<module name="ParameterNumber">
+			<property name="max" value="5" />
+			<property name="ignoreOverriddenMethods" value="true"/>
+			<property name="tokens" value="METHOD_DEF" />
+		</module>
+
+		<!-- Checks for whitespace                               -->
+		<!-- See https://checkstyle.org/config_whitespace.html -->
+		<module name="EmptyForIteratorPad"/>
+		<module name="GenericWhitespace"/>
+		<module name="MethodParamPad"/>
+		<module name="NoWhitespaceAfter"/>
+		<!--<module name="NoWhitespaceBefore"/>-->
+		<module name="OperatorWrap"/>
+		<module name="ParenPad"/>
+		<module name="TypecastParenPad"/>
+		<module name="WhitespaceAfter"/>
+		<module name="WhitespaceAround"/>
+
+		<!-- Modifier Checks                                    -->
+		<!-- See https://checkstyle.org/config_modifiers.html -->
+		<module name="ModifierOrder"/>
+		<module name="RedundantModifier"/>
+
+		<!-- Checks for blocks. You know, those {}'s         -->
+		<!-- See https://checkstyle.org/config_blocks.html -->
+		<module name="AvoidNestedBlocks"/>
+		<module name="EmptyBlock"/>
+		<module name="LeftCurly"/>
+		<module name="NeedBraces"/>
+		<module name="RightCurly"/>
+		<!-- Checks for common coding problems               -->
+		<!-- See https://checkstyle.org/config_coding.html -->
+		<module name="EmptyStatement"/>
+		<module name="EqualsHashCode"/>
+		<!-- <module name="HiddenField"/> -->
+		<module name="IllegalInstantiation"/>
+		<module name="InnerAssignment"/>
+		<module name="MagicNumber">
+			<property name="ignoreFieldDeclaration" value="true"/>
+			<property name="ignoreAnnotation" value="true"/>
+		</module>
+		<module name="MissingSwitchDefault"/>
+		<module name="MultipleVariableDeclarations"/>
+		<module name="SimplifyBooleanExpression"/>
+		<module name="SimplifyBooleanReturn"/>
+		<!-- Checks for class design                         -->
+		<!-- See https://checkstyle.org/config_design.html -->
+		<!-- <module name="DesignForExtension"/> -->
+		<module name="FinalClass"/>
+		<module name="InterfaceIsType"/>
+		<module name="HideUtilityClassConstructor"/>
+		<!-- 检查类成员的可见度 检查类成员的可见性。只有static final 成员是public的
+        除非在本检查的protectedAllowed和packagedAllowed属性中进行了设置-->
+		<module name="VisibilityModifier">
+			<property name="packageAllowed" value="true"/>
+			<property name="protectedAllowed" value="true"/>
+		</module>
+
+		<!-- Miscellaneous other checks.                   -->
+		<!-- See https://checkstyle.org/config_misc.html -->
+		<module name="ArrayTypeStyle"/>
+		<module name="TodoComment"/>
+		<module name="UpperEll"/>
+
+		<!-- Checks for class design                         -->
+		<!-- See https://checkstyle.org/config_design.html -->
+		<!-- <module name="DesignForExtension"/> -->
+		<module name="FinalClass"/>
+		<module name="InterfaceIsType"/>
+		<module name="HideUtilityClassConstructor"/>
+		<!-- 检查类成员的可见度 检查类成员的可见性。只有static final 成员是public的
+        除非在本检查的protectedAllowed和packagedAllowed属性中进行了设置-->
+		<module name="VisibilityModifier">
+			<property name="packageAllowed" value="true"/>
+			<property name="protectedAllowed" value="true"/>
+		</module>
+
+		<!-- Miscellaneous other checks.                   -->
+		<!-- See https://checkstyle.org/config_misc.html -->
+		<module name="ArrayTypeStyle"/>
+		<module name="TodoComment"/>
+		<module name="UpperEll"/>
+
+		<!-- 语法 -->
+		<!-- String的比较不能用!= 和 == -->
+		<module name="StringLiteralEquality"/>
+		<!-- 限制for循环最多嵌套2层 -->
+		<module name="NestedForDepth">
+			<property name="max" value="2"/>
+		</module>
+		<!-- if最多嵌套3层 -->
+		<module name="NestedIfDepth">
+			<property name="max" value="3"/>
+		</module>
+		<!-- 检查未被注释的main方法,排除以Appllication结尾命名的类 -->
+		<module name="UncommentedMain">
+			<property name="excludedClasses" value=".*[Application,Test]$"/>
+		</module>
+		<!-- 禁止使用System.out.println -->
+		<module name="Regexp">
+			<property name="format" value="System\.out\.println"/>
+			<property name="illegalPattern" value="true"/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<!--
+		<module name="Regexp">
+			<property name="format" value="//[^ ]+"/>
+			<property name="illegalPattern" value="true"/>
+			<property name="message" value="注释//后面必须添加一个空格"/>
+		</module>
+		-->
+		<!-- return个数 3个-->
+		<!--<module name="ReturnCount">-->
+		<!--<property name="max" value="3"/>-->
+		<!--</module>-->
+		<!--try catch 异常处理数量 3-->
+		<module name="NestedTryDepth ">
+			<property name="max" value="3"/>
+		</module>
+		<!-- clone方法必须调用了super.clone() -->
+		<module name="SuperClone" />
+		<!-- finalize 必须调用了super.finalize() -->
+		<module name="SuperFinalize" />
+	</module>
+</module>
