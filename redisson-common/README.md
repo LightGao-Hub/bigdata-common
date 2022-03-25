@@ -38,8 +38,6 @@
               .addNodeAddress("127.0.0.1:7004", "127.0.0.1:7001");
         return Redisson.create(config);
     }
-
-
-redisson支持多种方式创建, 更多方式参考官网: https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
-yml配置参考官网: https://github.com/redisson/redisson/wiki/2.-%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95#221-%E9%80%9A%E8%BF%87yaml%E6%A0%BC%E5%BC%8F%E9%85%8D%E7%BD%AE
-
+    
+    redisson支持多种方式创建, 更多方式参考官网: https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
+    yml配置参考官网: https://github.com/redisson/redisson/wiki/2.-%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95#221-%E9%80%9A%E8%BF%87yaml%E6%A0%BC%E5%BC%8F%E9%85%8D%E7%BD%AE
