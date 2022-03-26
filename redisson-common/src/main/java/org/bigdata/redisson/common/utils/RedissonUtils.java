@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+import org.bigdata.redisson.common.enums.CommonConstants;
 import org.redisson.api.RBucket;
 import org.redisson.api.RDeque;
 import org.redisson.api.RList;
@@ -22,10 +24,6 @@ import org.redisson.api.RQueue;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.protocol.ScoredEntry;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.bigdata.redisson.common.enums.CommonConstants;
 
 /**
  * redisson单例枚举工具类
@@ -37,7 +35,7 @@ import org.bigdata.redisson.common.enums.CommonConstants;
 @Slf4j
 public final class RedissonUtils {
 
-    private volatile static RedissonUtils INSTANCE;
+    private static volatile RedissonUtils instance;
 
     private final RedissonClient redisson;
 
@@ -46,18 +44,18 @@ public final class RedissonUtils {
     }
 
     public static RedissonUtils getInstance(Optional<RedissonClient> redisson) {
-        if (INSTANCE == null) {
+        if (instance == null) {
             synchronized (RedissonUtils.class) {
-                if (INSTANCE == null) {
+                if (instance == null) {
                     if (redisson.isPresent()) {
-                        INSTANCE = new RedissonUtils(redisson.get());
+                        instance = new RedissonUtils(redisson.get());
                     } else {
                         throw new NullPointerException("build RedissonUtils failed, RedissonClient is null");
                     }
                 }
             }
         }
-        return INSTANCE;
+        return instance;
     }
 
     /**
@@ -175,14 +173,14 @@ public final class RedissonUtils {
     /**
      * 将一个值插入到列表头部, 支持列表不存在
      */
-    public final <V> void lpush(String key, V elements) {
+    public <V> void lpush(String key, V elements) {
         redisson.getDeque(key).addFirst(elements);
     }
 
     /**
      * 在列表尾部中添加一个值, 支持列表不存在
      */
-    public final <V> boolean rpush(String key, V elements) {
+    public <V> boolean rpush(String key, V elements) {
         return redisson.getList(key).add(elements);
     }
 
@@ -336,7 +334,7 @@ public final class RedissonUtils {
     /**
      * 移除有序集合中的一个成员, 当key不存在时返回false
      */
-    public final <V> boolean zrem(String key, V v) {
+    public <V> boolean zrem(String key, V v) {
         return redisson.getScoredSortedSet(key).remove(v);
     }
 
@@ -356,22 +354,22 @@ public final class RedissonUtils {
         boolean isLock = false;
         Optional<R> result = Optional.empty();
         final RLock lock = redisson.getLock(lockKey);
-        final String ThreadName = Thread.currentThread().getName();
+        final String threadName = Thread.currentThread().getName();
         try {
             while (!isLock) {
                 isLock = lock.tryLock(CommonConstants.LOCK_WAIT_TIME_SECOND, TimeUnit.SECONDS);
                 if (isLock) {
-                    log.info(String.format(" Lock successfully, execute the function, ThreadName: %s ", ThreadName));
+                    log.info(String.format(" Lock successfully, execute the function, ThreadName: %s ", threadName));
                     result = func.apply(t);
                 } else {
-                    log.info(String.format(" Failed to lock. Try to lock, ThreadName: %s ", ThreadName));
+                    log.info(String.format(" Failed to lock. Try to lock, ThreadName: %s ", threadName));
                 }
             }
         } catch (Throwable throwable) {
             log.error(" Throwable locking ", throwable);
         } finally {
             if (isLock) {
-                log.info(String.format(" Release lock , ThreadName: %s ", ThreadName));
+                log.info(String.format(" Release lock , ThreadName: %s ", threadName));
                 lock.unlock();
             }
         }
