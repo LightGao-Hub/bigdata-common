@@ -72,9 +72,9 @@ public final class RedissonUtils {
     /**
      * 获取key值, key不存在返回值为null
      */
-    public <T> T get(String key) {
+    public <T> Optional<T> get(String key) {
         final RBucket<T> bucket = redisson.getBucket(key);
-        return bucket.get();
+        return Optional.ofNullable(bucket.get());
     }
 
     /**
@@ -82,11 +82,6 @@ public final class RedissonUtils {
      */
     public <T> void set(String key, T value) {
         RBucket<T> bucket = redisson.getBucket(key);
-        bucket.set(value);
-    }
-
-    public void set(String key, String value) {
-        RBucket<String> bucket = redisson.getBucket(key);
         bucket.set(value);
     }
 
@@ -106,7 +101,7 @@ public final class RedissonUtils {
     }
 
     /**
-     * 判断缓存是否存在
+     * 判断缓存是否存在, key不存在, 返回false
      */
     public boolean exists(String key) {
         return redisson.getBucket(key).isExists();
@@ -240,8 +235,7 @@ public final class RedissonUtils {
      */
     public <K, V> Map<K, V> hgetall(String key) {
         final RMap<K, V> map = redisson.getMap(key);
-        return map.readAllEntrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                Map.Entry::getValue));
+        return map.readAllEntrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
@@ -288,13 +282,12 @@ public final class RedissonUtils {
     /**
      * 同时将多个 field-value (域-值)对设置到哈希表 key 中, 支持hash不存在
      *
-     * @param map mappings to be stored in this map
+     * @param map       mappings to be stored in this map
      * @param batchSize - size of map entries batch
      */
     public <K, V> void hmset(String key, Map<? extends K, ? extends V> map, int batchSize) {
         redisson.getMap(key).putAll(map, batchSize);
     }
-
 
 
     //-------------------------------redis-Set-----------------------------------
@@ -320,7 +313,7 @@ public final class RedissonUtils {
 
     /**
      * 通过索引区间返回有序集合成指定区间内的成员, 若key不存在返回长度为0的Collection
-     *
+     * <p>
      * Indexes are zero based.
      * <code>-1</code> means the highest score, <code>-2</code> means the second highest score.
      */
@@ -331,7 +324,7 @@ public final class RedissonUtils {
 
     /**
      * 通过索引区间返回有序集合成指定区间内的成员及权重值, 若key不存在返回长度为0的Collection
-     *
+     * <p>
      * Indexes are zero based.
      * <code>-1</code> means the highest score, <code>-2</code> means the second highest score.
      */
@@ -350,14 +343,14 @@ public final class RedissonUtils {
     //-------------------------------redis-分布式锁-----------------------------------
 
     /**
-     *  此分布式锁默认抢占锁后设置的过期时间为30秒, 支持自动续约, 支持可重入
+     * 此分布式锁默认抢占锁后设置的过期时间为30秒, 支持自动续约, 支持可重入
      *
      * @param lockKey 锁
-     * @param t Optional<T>入参
-     * @param func  执行函数Lambda表达式
-     * @param <T>   入参类型
-     * @param <R>   返回值类型
-     * @return  Optional<R>返回值
+     * @param t       Optional<T>入参
+     * @param func    执行函数Lambda表达式
+     * @param <T>     入参类型
+     * @param <R>     返回值类型
+     * @return Optional<R>返回值
      */
     public <T, R> Optional<R> lock(String lockKey, Optional<T> t, Function<Optional<T>, Optional<R>> func) {
         boolean isLock = false;
