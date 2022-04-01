@@ -1,8 +1,10 @@
 package org.bigdata.redisson.common.utils;
 
+import static org.bigdata.redisson.common.enums.CommonConstants.END_INDEX;
 import static org.bigdata.redisson.common.enums.CommonConstants.FIRST;
 import static org.bigdata.redisson.common.enums.CommonConstants.ZERO;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -332,6 +334,18 @@ public final class RedissonUtils {
     }
 
     /**
+     * 获取有序队列中最高score, 若key不存在返回0.0
+     */
+    public <V> double zmax(String key) {
+        final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
+        if (sortedSet.size() == ZERO) {
+            return ZERO;
+        }
+        final Collection<ScoredEntry<V>> scoredEntries = sortedSet.entryRange(END_INDEX, END_INDEX);
+        return new ArrayList<>(scoredEntries).get(ZERO).getScore();
+    }
+
+    /**
      * 移除有序集合中的一个成员, 当key不存在时返回false
      */
     public <V> boolean zrem(String key, V v) {
@@ -359,17 +373,17 @@ public final class RedissonUtils {
             while (!isLock) {
                 isLock = lock.tryLock(CommonConstants.LOCK_WAIT_TIME_SECOND, TimeUnit.SECONDS);
                 if (isLock) {
-                    log.info(String.format(" Lock successfully, execute the function, ThreadName: %s ", threadName));
+                    log.debug(String.format(" Lock successfully, execute the function, ThreadName: %s ", threadName));
                     result = func.apply(t);
                 } else {
-                    log.info(String.format(" Failed to lock. Try to lock, ThreadName: %s ", threadName));
+                    log.debug(String.format(" Failed to lock. Try to lock, ThreadName: %s ", threadName));
                 }
             }
         } catch (Throwable throwable) {
             log.error(" Throwable locking ", throwable);
         } finally {
             if (isLock) {
-                log.info(String.format(" Release lock , ThreadName: %s ", threadName));
+                log.debug(String.format(" Release lock , ThreadName: %s ", threadName));
                 lock.unlock();
             }
         }
