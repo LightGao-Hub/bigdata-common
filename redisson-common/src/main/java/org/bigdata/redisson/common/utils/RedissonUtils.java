@@ -327,12 +327,8 @@ public final class RedissonUtils {
      */
     public <V> Optional<V> zrpop(String key) {
         final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
-        final Iterator<V> iterator = sortedSet.valueRange(END_INDEX, END_INDEX).iterator();
-        if (iterator.hasNext()) {
-            return Optional.of(iterator.next());
-        } else  {
-            return Optional.empty();
-        }
+        Iterator<V> iterator = sortedSet.valueRange(END_INDEX, END_INDEX).iterator();
+        return iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
     }
 
     /**
@@ -351,12 +347,8 @@ public final class RedissonUtils {
      */
     public <V> double zmax(String key) {
         final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
-        final Iterator<ScoredEntry<V>> iterator = sortedSet.entryRange(END_INDEX, END_INDEX).iterator();
-        if (iterator.hasNext()) {
-            return iterator.next().getScore();
-        } else {
-            return ZERO;
-        }
+        Iterator<ScoredEntry<V>> iterator = sortedSet.entryRange(END_INDEX, END_INDEX).iterator();
+        return iterator.hasNext() ? iterator.next().getScore() : ZERO;
     }
 
     /**
