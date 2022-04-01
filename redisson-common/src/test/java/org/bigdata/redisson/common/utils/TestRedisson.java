@@ -185,6 +185,7 @@ public class TestRedisson {
         redissonUtils.zrangebyscore(sortKey, ZERO, END_INDEX).forEach((v) -> log.info(String.format("zrem, score: %s, value: %s", v.getScore(), v.getValue())));
         redissonUtils.zadd(sortKey, SECOND, values.get(SECOND));
         log.info(String.format("zmax sortKey: %s, max: %s", sortKey, redissonUtils.zmax(sortKey)));
+        log.info(String.format("zrpop sortKey: %s, value: %s", sortKey, redissonUtils.zrpop(sortKey)));
         log.info(String.format("redissonSortedSet process end, del sortKey: %s, boolean: %s", sortKey, redissonUtils.del(sortKey)));
         log.info("------------>");
     }

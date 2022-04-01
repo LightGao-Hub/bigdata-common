@@ -7,6 +7,7 @@ import static org.bigdata.redisson.common.enums.CommonConstants.ZERO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -323,6 +324,19 @@ public final class RedissonUtils {
     }
 
     /**
+     * 读取有序列表头元素, 若队列不存在或无元素则返回空Optional
+     */
+    public <V> Optional<V> zrpop(String key) {
+        final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
+        final Iterator<V> iterator = sortedSet.valueRange(END_INDEX, END_INDEX).iterator();
+        if(iterator.hasNext()) {
+            return Optional.of(iterator.next());
+        } else  {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * 通过索引区间返回有序集合成指定区间内的成员及权重值, 若key不存在返回长度为0的Collection
      * <p>
      * Indexes are zero based.
@@ -338,11 +352,12 @@ public final class RedissonUtils {
      */
     public <V> double zmax(String key) {
         final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
-        if (sortedSet.size() == ZERO) {
+        final Iterator<ScoredEntry<V>> iterator = sortedSet.entryRange(END_INDEX, END_INDEX).iterator();
+        if (iterator.hasNext()) {
+            return iterator.next().getScore();
+        } else {
             return ZERO;
         }
-        final Collection<ScoredEntry<V>> scoredEntries = sortedSet.entryRange(END_INDEX, END_INDEX);
-        return new ArrayList<>(scoredEntries).get(ZERO).getScore();
     }
 
     /**
