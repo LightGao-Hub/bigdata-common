@@ -4,7 +4,6 @@ import static org.bigdata.redisson.common.enums.CommonConstants.END_INDEX;
 import static org.bigdata.redisson.common.enums.CommonConstants.FIRST;
 import static org.bigdata.redisson.common.enums.CommonConstants.ZERO;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -329,7 +328,7 @@ public final class RedissonUtils {
     public <V> Optional<V> zrpop(String key) {
         final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
         final Iterator<V> iterator = sortedSet.valueRange(END_INDEX, END_INDEX).iterator();
-        if(iterator.hasNext()) {
+        if (iterator.hasNext()) {
             return Optional.of(iterator.next());
         } else  {
             return Optional.empty();
