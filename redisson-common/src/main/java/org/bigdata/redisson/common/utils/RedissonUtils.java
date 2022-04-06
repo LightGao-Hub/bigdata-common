@@ -15,7 +15,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.Data;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
 import org.bigdata.redisson.common.enums.CommonConstants;
 import org.redisson.api.RBucket;
 import org.redisson.api.RDeque;
@@ -139,7 +142,7 @@ public final class RedissonUtils {
     }
 
     /**
-     * 读取列表的第一个元素, 如果此队列不存在, 则返回空Optional
+     * 读取列表左侧的第一个元素, 如果此队列不存在, 则返回空Optional
      */
     public <T> Optional<T> rlpop(String key) {
         final RList<T> list = redisson.getList(key);
@@ -147,7 +150,7 @@ public final class RedissonUtils {
     }
 
     /**
-     * 读取列表最后一个元素, 如果此队列不存在, 则返回空Optional
+     * 读取列表右侧最后一个元素, 如果此队列不存在, 则返回空Optional
      */
     public <T> Optional<T> rrpop(String key) {
         final RList<T> list = redisson.getList(key);
@@ -337,9 +340,9 @@ public final class RedissonUtils {
      * Indexes are zero based.
      * <code>-1</code> means the highest score, <code>-2</code> means the second highest score.
      */
-    public <V> Collection<ScoredEntry<V>> zrangebyscore(String key, int startIndex, int endIndex) {
+    public <V> Collection<ScoredEntryEx<V>> zrangebyscore(String key, int startIndex, int endIndex) {
         final RScoredSortedSet<V> sortedSet = redisson.getScoredSortedSet(key);
-        return sortedSet.entryRange(startIndex, endIndex);
+        return sortedSet.entryRange(startIndex, endIndex).stream().map(ScoredEntryEx::new).collect(Collectors.toList());
     }
 
     /**
@@ -356,6 +359,18 @@ public final class RedissonUtils {
      */
     public <V> boolean zrem(String key, V v) {
         return redisson.getScoredSortedSet(key).remove(v);
+    }
+
+    @Data
+    public static class ScoredEntryEx<V> {
+        private final Double score;
+        private final V value;
+
+        private ScoredEntryEx(ScoredEntry<V> scoredEntry) {
+            super();
+            this.score = scoredEntry.getScore();
+            this.value = scoredEntry.getValue();
+        }
     }
 
     //-------------------------------redis-分布式锁-----------------------------------

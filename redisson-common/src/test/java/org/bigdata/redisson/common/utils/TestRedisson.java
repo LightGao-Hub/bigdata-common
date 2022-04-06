@@ -62,17 +62,17 @@ public class TestRedisson {
         final String key = "redisson:key";
         final String value = "redisson-string-value";
         log.info("<------------ ");
-        log.info(String.format("del key: %s, boolean: %s", key, redissonUtils.del(key)));
+        log.info("del key: {}, boolean: {}", key, redissonUtils.del(key));
 
         redissonUtils.set(key, value);
-        log.info(String.format("set key: %s, value: %s", key, value));
-        log.info(String.format("get key: %s, value: %s", key, redissonUtils.get(key)));
-        log.info(String.format("exists key: %s, exists: %s", key, redissonUtils.exists(key)));
+        log.info("set key: {}, value: {}", key, value);
+        log.info("get key: {}, value: {}", key, redissonUtils.get(key));
+        log.info("exists key: {}, exists: {}", key, redissonUtils.exists(key));
 
         redissonUtils.setex(key, value, LOCK_WAIT_TIME_SECOND, SECONDS);
-        log.info(String.format("setex key: %s, value: %s, timeToLive: %s, timeUnit: %s", key, value, LOCK_WAIT_TIME_SECOND, SECONDS));
-        log.info(String.format("get key: %s, value: %s", key, redissonUtils.get(key)));
-        log.info(String.format("redissonString process end, del key: %s, boolean: %s", key, redissonUtils.del(key)));
+        log.info("setex key: {}, value: {}, timeToLive: {}, timeUnit: {}", key, value, LOCK_WAIT_TIME_SECOND, SECONDS);
+        log.info("get key: {}, value: {}", key, redissonUtils.get(key));
+        log.info("redissonString process end, del key: {}, boolean: {}", key, redissonUtils.del(key));
         log.info("------------>");
     }
 
@@ -85,37 +85,37 @@ public class TestRedisson {
         final String listKeyTemp = "redisson:list:tmp";
         final List<String> values = Arrays.asList("first", "second", "third", "fourth");
         log.info("<------------ ");
-        log.info(String.format("remove listKey: %s, boolean: %s", listKey, redissonUtils.del(listKey)));
-        log.info(String.format("remove listKeyTemp: %s, boolean: %s", listKeyTemp, redissonUtils.del(listKeyTemp)));
+        log.info("remove listKey: {}, boolean: {}", listKey, redissonUtils.del(listKey));
+        log.info("remove listKeyTemp: {}, boolean: {}", listKeyTemp, redissonUtils.del(listKeyTemp));
 
         redissonUtils.lpush(listKey, values.get(FIRST));
         redissonUtils.lpush(listKey, values.get(ZERO));
-        log.info(String.format("lpush listKey: %s, listValues: %s", listKey, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey))));
+        log.info("lpush listKey: {}, listValues: {}", listKey, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)));
 
         boolean rpush = redissonUtils.rpush(listKey, values.get(THIRD));
-        log.info(String.format("rpush listKey: %s, boolean: %s, listValues: %s", listKey, rpush, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey))));
+        log.info("rpush listKey: {}, boolean: {}, listValues: {}", listKey, rpush, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)));
 
         Optional<String> rlpop = redissonUtils.rlpop(listKey);
-        log.info(String.format("rlpop listKey: %s, value: %s", listKey, rlpop));
+        log.info("rlpop listKey: {}, value: {}", listKey, rlpop);
         Optional<String> rrpop = redissonUtils.rrpop(listKey);
-        log.info(String.format("rrpop listKey: %s, value: %s", listKey, rrpop));
+        log.info("rrpop listKey: {}, value: {}", listKey, rrpop);
 
         redissonUtils.lset(listKey, SECOND, values.get(SECOND));
-        log.info(String.format("lset listKey: %s, listValues: %s", listKey, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey))));
+        log.info("lset listKey: {}, listValues: {}", listKey, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)));
 
         Optional<String> lpop = redissonUtils.lpop(listKey);
-        log.info(String.format("lpop listKey: %s, value: %s, listValues: %s", listKey, lpop, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey))));
+        log.info("lpop listKey: {}, value: {}, listValues: {}", listKey, lpop, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)));
         Optional<String> rpop = redissonUtils.rpop(listKey);
-        log.info(String.format("lpop listKey: %s, value: %s, listValues: %s", listKey, rpop, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey))));
+        log.info("lpop listKey: {}, value: {}, listValues: {}", listKey, rpop, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)));
 
         Optional<String> rpoplpush = redissonUtils.rpoplpush(listKey, listKeyTemp);
-        log.info(String.format("rpoplpush listKey: %s, listKeyTemp: %s, value: %s, listValues: %s, listKeyTemp: %s", listKey, listKeyTemp, rpoplpush,
-                redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)), redissonUtils.lrange(listKeyTemp, ZERO, redissonUtils.llen(listKeyTemp))));
+        log.info("rpoplpush listKey: {}, listKeyTemp: {}, value: {}, listValues: {}, listKeyTemp: {}", listKey, listKeyTemp, rpoplpush,
+                redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKey)), redissonUtils.lrange(listKeyTemp, ZERO, redissonUtils.llen(listKeyTemp)));
 
         redissonUtils.lrem(listKeyTemp, ZERO);
-        log.info(String.format("lrem listKey: %s, listValues: %s", listKeyTemp, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKeyTemp))));
-        log.info(String.format("redissonList process end, del listKey: %s, boolean: %s", listKey, redissonUtils.del(listKey)));
-        log.info(String.format("redissonList process end, del listKeyTemp: %s, boolean: %s", listKeyTemp, redissonUtils.del(listKeyTemp)));
+        log.info("lrem listKey: {}, listValues: {}", listKeyTemp, redissonUtils.lrange(listKey, ZERO, redissonUtils.llen(listKeyTemp)));
+        log.info("redissonList process end, del listKey: {}, boolean: {}", listKey, redissonUtils.del(listKey));
+        log.info("redissonList process end, del listKeyTemp: {}, boolean: {}", listKeyTemp, redissonUtils.del(listKeyTemp));
         log.info("------------>");
     }
 
@@ -131,32 +131,32 @@ public class TestRedisson {
             put(SECOND, String.valueOf(SECOND));
         }};
         log.info("<------------ ");
-        log.info(String.format("del hashKey: %s, boolean: %s", hashKey, redissonUtils.del(hashKey)));
+        log.info("del hashKey: {}, boolean: {}", hashKey, redissonUtils.del(hashKey));
 
         redissonUtils.hmset(hashKey, values, values.size());
-        log.info(String.format("hmset hashKey: %s, hashAll: %s", hashKey, redissonUtils.hgetall(hashKey)));
+        log.info("hmset hashKey: {}, hashAll: {}", hashKey, redissonUtils.hgetall(hashKey));
         redissonUtils.hset(hashKey, THIRD, String.valueOf(THIRD));
-        log.info(String.format("hset hashKey: %s, hashAll: %s", hashKey, redissonUtils.hgetall(hashKey)));
+        log.info("hset hashKey: {}, hashAll: {}", hashKey, redissonUtils.hgetall(hashKey));
 
         Optional<String> hget = redissonUtils.hget(hashKey, THIRD);
-        log.info(String.format("hget hashKey: %s, value: %s", hashKey, hget));
+        log.info("hget hashKey: {}, value: {}", hashKey, hget);
         Map<Integer, String> hgetall = redissonUtils.hgetall(hashKey);
-        log.info(String.format("hgetall hashKey: %s, values: %s", hashKey, hgetall));
+        log.info("hgetall hashKey: {}, values: {}", hashKey, hgetall);
         Map<Integer, String> hmget = redissonUtils.hmget(hashKey, FIRST, SECOND, THIRD);
-        log.info(String.format("hmget hashKey: %s, map: %s", hashKey, hmget));
+        log.info("hmget hashKey: {}, map: {}", hashKey, hmget);
 
         boolean hexists = redissonUtils.hexists(hashKey, THIRD);
-        log.info(String.format("hexists hashKey: %s, boolean: %s", hashKey, hexists));
+        log.info("hexists hashKey: {}, boolean: {}", hashKey, hexists);
         Set<Integer> hkeys = redissonUtils.hkeys(hashKey);
-        log.info(String.format("hkeys hashKey: %s, keys: %s", hashKey, hkeys));
+        log.info("hkeys hashKey: {}, keys: {}", hashKey, hkeys);
         Collection<Object> hvals = redissonUtils.hvals(hashKey);
-        log.info(String.format("hvals hashKey: %s, values: %s", hashKey, hvals));
+        log.info("hvals hashKey: {}, values: {}", hashKey, hvals);
         int hlen = redissonUtils.hlen(hashKey);
-        log.info(String.format("hlen hashKey: %s, size: %s", hashKey, hlen));
+        log.info("hlen hashKey: {}, size: {}", hashKey, hlen);
 
         long hdel = redissonUtils.hdel(hashKey, FIRST, SECOND);
-        log.info(String.format("hdel hashKey: %s, hdel: %s, hashAll: %s", hashKey, hdel, redissonUtils.hgetall(hashKey)));
-        log.info(String.format("redissonHash process end, del hashKey: %s, boolean: %s", hashKey, redissonUtils.del(hashKey)));
+        log.info("hdel hashKey: {}, hdel: {}, hashAll: {}", hashKey, hdel, redissonUtils.hgetall(hashKey));
+        log.info("redissonHash process end, del hashKey: {}, boolean: {}", hashKey, redissonUtils.del(hashKey));
         log.info("------------>");
     }
 
@@ -172,21 +172,21 @@ public class TestRedisson {
             put(SECOND, String.valueOf(SECOND));
         }};
         log.info("<------------ ");
-        log.info(String.format("del sortKey: %s, boolean: %s", sortKey, redissonUtils.del(sortKey)));
+        log.info("del sortKey: {}, boolean: {}", sortKey, redissonUtils.del(sortKey));
 
         redissonUtils.zadd(sortKey, ZERO, values.get(ZERO));
         redissonUtils.zadd(sortKey, FIRST, values.get(FIRST));
-        redissonUtils.zrange(sortKey, ZERO, END_INDEX).forEach((v) -> log.info(String.format("zadd, value: %s", v)));
+        redissonUtils.zrange(sortKey, ZERO, END_INDEX).forEach((v) -> log.info("zadd, value: {}", v));
         redissonUtils.zadd(sortKey, SECOND, values.get(ZERO));
-        redissonUtils.zrangebyscore(sortKey, ZERO, END_INDEX).forEach((v) -> log.info(String.format("zadd overwrite, score: %s, value: %s", v.getScore(), v.getValue())));
+        redissonUtils.zrangebyscore(sortKey, ZERO, END_INDEX).forEach((v) -> log.info("zadd overwrite, value: {}", v));
 
-        log.info(String.format("zcard sortKey: %s, size: %s", sortKey, redissonUtils.zcard(sortKey)));
-        log.info(String.format("zrem sortKey: %s, boolean: %s", sortKey, redissonUtils.zrem(sortKey, values.get(ZERO))));
-        redissonUtils.zrangebyscore(sortKey, ZERO, END_INDEX).forEach((v) -> log.info(String.format("zrem, score: %s, value: %s", v.getScore(), v.getValue())));
+        log.info("zcard sortKey: {}, size: {}", sortKey, redissonUtils.zcard(sortKey));
+        log.info("zrem sortKey: {}, boolean: {}", sortKey, redissonUtils.zrem(sortKey, values.get(ZERO)));
+        redissonUtils.zrangebyscore(sortKey, ZERO, END_INDEX).forEach((v) -> log.info("zrem, value: {}", v));
         redissonUtils.zadd(sortKey, SECOND, values.get(SECOND));
-        log.info(String.format("zmax sortKey: %s, max: %s", sortKey, redissonUtils.zmax(sortKey)));
-        log.info(String.format("zrpop sortKey: %s, value: %s", sortKey, redissonUtils.zrpop(sortKey)));
-        log.info(String.format("redissonSortedSet process end, del sortKey: %s, boolean: %s", sortKey, redissonUtils.del(sortKey)));
+        log.info("zmax sortKey: {}, max: {}", sortKey, redissonUtils.zmax(sortKey));
+        log.info("zrpop sortKey: {}, value: {}", sortKey, redissonUtils.zrpop(sortKey));
+        log.info("redissonSortedSet process end, del sortKey: {}, boolean: {}", sortKey, redissonUtils.del(sortKey));
         log.info("------------>");
     }
 
@@ -215,12 +215,12 @@ public class TestRedisson {
         final String ThreadName = Thread.currentThread().getName();
         redissonUtils.lock(lock, Optional.empty(), (v) -> {
             try {
-                log.info(String.format("ThreadName: %s, sleep: %s", ThreadName, LOCK_WAIT_TIME_MILLIS));
+                log.info("ThreadName: {}, sleep: {}", ThreadName, LOCK_WAIT_TIME_MILLIS);
                 Thread.sleep(LOCK_WAIT_TIME_MILLIS);
                 // 重入锁
                 redissonUtils.lock(lock, Optional.empty(), (e) -> {
                     try {
-                        log.info(String.format("ThreadName: %s, sleep: %s", ThreadName, LOCK_WAIT_TIME_MILLIS));
+                        log.info("ThreadName: {}, sleep: {}", ThreadName, LOCK_WAIT_TIME_MILLIS);
                         Thread.sleep(LOCK_WAIT_TIME_MILLIS);
                     } catch (InterruptedException ignored) {
                     }
