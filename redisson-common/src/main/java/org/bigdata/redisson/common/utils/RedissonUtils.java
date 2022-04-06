@@ -16,9 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.Data;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
 import org.bigdata.redisson.common.enums.CommonConstants;
 import org.redisson.api.RBucket;
 import org.redisson.api.RDeque;
@@ -362,7 +360,7 @@ public final class RedissonUtils {
     }
 
     @Data
-    public static class ScoredEntryEx<V> {
+    public static final class ScoredEntryEx<V> {
         private final Double score;
         private final V value;
 
