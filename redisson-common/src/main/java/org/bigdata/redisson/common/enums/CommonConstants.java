@@ -7,8 +7,6 @@ package org.bigdata.redisson.common.enums;
 public enum CommonConstants {
     ;
 
-    public static final String EMPTY_STRING = "";
-
     public static final int FIRST = 1;
     public static final int SECOND = 2;
     public static final int THIRD = 3;

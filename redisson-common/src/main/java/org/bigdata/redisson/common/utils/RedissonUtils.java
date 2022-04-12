@@ -392,17 +392,17 @@ public final class RedissonUtils {
             while (!isLock) {
                 isLock = lock.tryLock(CommonConstants.LOCK_WAIT_TIME_SECOND, TimeUnit.SECONDS);
                 if (isLock) {
-                    log.debug(String.format(" Lock successfully, execute the function, ThreadName: %s ", threadName));
+                    log.info(String.format(" Lock successfully, execute the function, ThreadName: %s ", threadName));
                     result = func.apply(t);
                 } else {
-                    log.debug(String.format(" Failed to lock. Try to lock, ThreadName: %s ", threadName));
+                    log.info(String.format(" Failed to lock. Try to lock, ThreadName: %s ", threadName));
                 }
             }
         } catch (Throwable throwable) {
             log.error(" Throwable locking ", throwable);
         } finally {
-            if (isLock) {
-                log.debug(String.format(" Release lock , ThreadName: %s ", threadName));
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info(String.format(" Release lock , ThreadName: %s ", threadName));
                 lock.unlock();
             }
         }
