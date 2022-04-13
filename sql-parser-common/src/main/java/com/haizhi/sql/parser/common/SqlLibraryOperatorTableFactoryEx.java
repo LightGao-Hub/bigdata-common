@@ -1,4 +1,5 @@
 package com.haizhi.sql.parser.common;
+// CHECKSTYLE:OFF
 
 import static java.util.Objects.requireNonNull;
 

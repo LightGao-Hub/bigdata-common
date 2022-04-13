@@ -1,5 +1,5 @@
 package com.haizhi.sql.parser.common;
-
+// CHECKSTYLE:OFF
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;

@@ -1,5 +1,5 @@
 package com.haizhi.sql.parser.common;
-
+// CHECKSTYLE:OFF
 
 import static com.haizhi.sql.parser.common.SqlLibraryEx.ANALYTICDB;
 import static com.haizhi.sql.parser.common.SqlLibraryEx.CLICKHOUSE;
