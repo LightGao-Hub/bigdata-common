@@ -1,0 +1,25 @@
+#Redisson配置, 详细见官网配置：https://github.com/redisson/redisson/wiki/2.-%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95#262-%E9%80%9A%E8%BF%87yaml%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F
+---
+singleServerConfig:
+  idleConnectionTimeout: 10000
+  connectTimeout: 10000
+  timeout: 3000
+  retryAttempts: 3
+  retryInterval: 1500
+  password: null
+  subscriptionsPerConnection: 5
+  clientName: null
+  address: "redis://127.0.0.1:6379"
+  subscriptionConnectionMinimumIdleSize: 1
+  subscriptionConnectionPoolSize: 50
+  connectionMinimumIdleSize: 3
+  connectionPoolSize: 5
+  database: 0
+  dnsMonitoringInterval: 5000
+  #dnsMonitoring: false
+
+threads: 0
+nettyThreads: 0
+codec: #建议显示配置redisson序列化: JsonJacksonCodec
+  class: "org.redisson.codec.JsonJacksonCodec"
+transportMode: "NIO"
