@@ -7,6 +7,37 @@
     1、clickhouse-common ： clickhouse公共模块，暂时只有连接Demo。
     
     2、sql-parser-common ： SQL语法树解析模块，提供方言解析&自定义方言Demo.
+    
+#### 运行checkstyle校验
+
+``` shell
+mvn clean validate -Dforce.refresh.release=true
+```
+
+
+
+#### 跳过checkstyle校验编译
+
+``` shell
+mvn clean compile -Dcheckstyle.skip=true
+```
+
+
+
+#### install打包方式
+
+```shell
+mvn -U  clean install  -DskipTests
+```
+
+
+
+#### 子父工程版本修改
+
+``` shell
+mvn versions:set -DnewVersion=2.0
+```
+
 
 ## [版本功能迭代记录](doc/release-note.md)
     
