@@ -1,12 +1,10 @@
 package org.bigdate.etl.common.scala.test.spark.executors.middle
 
-import java.util
-
-import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.bigdata.etl.common.annotations.ETLExecutor
-import org.bigdata.etl.common.configs.DirtyConfig
 import org.bigdata.etl.common.executors.MiddleExecutor
+import org.bigdate.etl.common.scala.test.spark.configs.DirtyConfig
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -14,22 +12,20 @@ import org.slf4j.{Logger, LoggerFactory}
  * Date: 2022-05-05
  */
 @ETLExecutor("dirty")
-class DirtyMiddleExecutor extends MiddleExecutor[SparkContext, RDD[Integer], DirtyConfig] {
+class DirtyMiddleExecutor extends MiddleExecutor[SparkSession, RDD[String], DataFrame, DirtyConfig] {
 
   val log: Logger = LoggerFactory.getLogger(classOf[DirtyMiddleExecutor])
 
-  override def init(engine: SparkContext, config: DirtyConfig): Unit = {
+  override def init(engine: SparkSession, config: DirtyConfig): Unit = {
     log.info("DirtyMiddle init, config: {}", config)
   }
 
-  override def process(dataCollection: util.Collection[RDD[Integer]], config: DirtyConfig): util.Collection[RDD[Integer]] = {
-    log.info("DirtyMiddle process, config: {}", config)
-    val first = dataCollection.stream.findFirst
-    log.info("middle collect: {}", first.get().collect())
-    dataCollection
+  override def process(engine: SparkSession, value: RDD[String], config: DirtyConfig): DataFrame = {
+    import engine.implicits._
+    value.toDF()
   }
 
-  override def close(engine: SparkContext, config: DirtyConfig): Unit = {
+  override def close(engine: SparkSession, config: DirtyConfig): Unit = {
     log.info("DirtyMiddleExecutor close, config: {}", config)
   }
 

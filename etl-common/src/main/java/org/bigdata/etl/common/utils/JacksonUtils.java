@@ -8,10 +8,13 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 import com.sun.istack.internal.NotNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,12 +25,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class JacksonUtils {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonMapper.builder().addModule(new DefaultScalaModule()).build();
 
     static {
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         MAPPER.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        // 枚举属性忽略大小写
+        MAPPER.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
     }
 
     private JacksonUtils() {

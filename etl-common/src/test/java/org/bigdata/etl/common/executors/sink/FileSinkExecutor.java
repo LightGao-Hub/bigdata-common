@@ -25,10 +25,9 @@ public class FileSinkExecutor implements SinkExecutor<SparkContext, RDD<String>,
     }
 
     @Override
-    public void process(Collection<RDD<String>> data, FileConfig config) {
+    public void process(SparkContext engine, RDD<String> value, FileConfig config) {
         log.info("FileSinkExecutor process, config: {}", config);
-        final Optional<RDD<String>> first = data.stream().findFirst();
-        first.ifPresent((rdd) -> rdd.saveAsTextFile(config.getPath()));
+        value.saveAsTextFile(config.getPath());
     }
 
     @Override

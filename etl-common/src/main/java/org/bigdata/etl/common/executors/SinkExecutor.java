@@ -15,11 +15,11 @@ import org.bigdata.etl.common.inspect.ETLCheck;
  * Author: GL
  * Date: 2022-04-21
  */
-public interface SinkExecutor<E, D, C extends ExecutorConfig> extends ETLCheck<C>, Serializable {
+public interface SinkExecutor<E, I, C extends ExecutorConfig> extends ETLCheck<C>, Serializable {
 
     void init(E engine, C config); // 泛型参数及jsonObject的值
 
-    void process(Collection<D> data, C config);
+    void process(E engine, I value, C config);
 
     void close(E engine, C config);
 }

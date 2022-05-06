@@ -1,7 +1,6 @@
 package org.bigdata.etl.common.executors;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 import org.bigdata.etl.common.configs.ExecutorConfig;
 import org.bigdata.etl.common.inspect.ETLCheck;
@@ -15,11 +14,11 @@ import org.bigdata.etl.common.inspect.ETLCheck;
  * Author: GL
  * Date: 2022-04-21
  */
-public interface SourceExecutor<E, D, C extends ExecutorConfig> extends ETLCheck<C>, Serializable {
+public interface SourceExecutor<E, O, C extends ExecutorConfig> extends ETLCheck<C>, Serializable {
 
-    void init(E engine, C config); // 泛型参数及jsonObject的值
+    void init(E engine, C config);
 
-    Collection<D> process(E engine, C config);
+    O process(E engine, C config);
 
     void close(E engine, C config);
 }

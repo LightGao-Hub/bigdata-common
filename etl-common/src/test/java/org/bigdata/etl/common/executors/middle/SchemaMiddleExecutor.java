@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 @Slf4j
 @ETLExecutor("schema")
-public class SchemaMiddleExecutor implements MiddleExecutor<SparkContext, RDD, SchemaConfig> {
+public class SchemaMiddleExecutor implements MiddleExecutor<SparkContext, RDD<String>, RDD<String>, SchemaConfig> {
 
     @Override
     public void init(SparkContext engine, SchemaConfig config) {
@@ -26,9 +26,8 @@ public class SchemaMiddleExecutor implements MiddleExecutor<SparkContext, RDD, S
     }
 
     @Override
-    public Collection<RDD> process(Collection<RDD> dataCollection, SchemaConfig config) {
-        final Optional<RDD> first = dataCollection.stream().findFirst();
-        return dataCollection;
+    public RDD<String> process(SparkContext engine, RDD<String> value, SchemaConfig config) {
+        return value;
     }
 
     @Override

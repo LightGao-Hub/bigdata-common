@@ -7,7 +7,6 @@ import org.bigdata.etl.common.annotations.ETLExecutor;
 import org.bigdata.etl.common.configs.FileConfig;
 import org.bigdata.etl.common.executors.SourceExecutor;
 
-import java.util.Collection;
 import java.util.Collections;
 
 
@@ -25,10 +24,9 @@ public class FileSourceExecutor implements SourceExecutor<SparkContext, RDD<Stri
     }
 
     @Override
-    public Collection<RDD<String>> process(SparkContext engine, FileConfig config) {
+    public RDD<String> process(SparkContext engine, FileConfig config) {
         log.info("FileSourceExecutor process, config: {}", config);
-        final RDD<String> stringRDD = engine.textFile(config.getPath(), 2);
-        return Collections.singleton(stringRDD);
+        return engine.textFile(config.getPath(), 2);
     }
 
 

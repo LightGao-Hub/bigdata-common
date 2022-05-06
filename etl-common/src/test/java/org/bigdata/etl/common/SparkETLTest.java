@@ -50,13 +50,13 @@ public class SparkETLTest {
 
     @Test
     public void start() throws Exception {
-        final ETLContext<SparkContext, RDD<String>> etlContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
+        final ETLContext<SparkContext> etlContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
         etlContext.start();
     }
 
     @Test
     public void stop() throws Exception {
-        final ETLContext<SparkContext, RDD<String>> etlContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
+        final ETLContext<SparkContext> etlContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
         etlContext.close();
     }
 
@@ -71,70 +71,6 @@ public class SparkETLTest {
         log.info("time: {}, collect: {}", System.currentTimeMillis(), collect3);
         final Object collect4 = stringRDD.collect();
         log.info("time: {}, collect: {}", System.currentTimeMillis(), collect4);
-    }
-
-
-    @Test
-    public void earlySparkETL() throws IOException {
-        final SourceExecutor<SparkContext, RDD<String>, FileConfig> source = new FileSourceExecutor();
-        final MiddleExecutor<SparkContext, RDD<String>, DirtyConfig> middle = new DirtyMiddleExecutor();
-        final SinkExecutor<SparkContext, RDD<String>, FileConfig> sink = new FileSinkExecutor();
-
-        final String inputPath = Objects.requireNonNull(SparkETLTest.class.getClassLoader().getResource("input.txt")).getPath();
-        final String outPutPath = new File(inputPath).getParent().concat("/out");
-        FileUtils.deleteDirectory(new File(outPutPath));
-
-        final FileConfig hdfsSourceConfig = new FileConfig(inputPath);
-        final DirtyConfig dirtyConfig = new DirtyConfig();
-        final FileConfig hdfsSinkConfig = new FileConfig(outPutPath);
-
-        source.init(sc, hdfsSourceConfig);
-        middle.init(sc, dirtyConfig);
-        sink.init(sc, hdfsSinkConfig);
-
-        Collection<RDD<String>> sourceProcess = source.process(sc, hdfsSourceConfig);
-        Collection<RDD<String>> dirtyProcess = middle.process(sourceProcess, dirtyConfig);
-        sink.process(dirtyProcess, hdfsSinkConfig);
-    }
-
-    @Test
-    public void ealrySparkETL2() throws IOException, NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException {
-        // 下面三种执行类在ETLContext中已经创建完毕，这里模拟的是反射执行etl过程.
-        final SourceExecutor<SparkContext, RDD<String>, FileConfig> source = new FileSourceExecutor();
-        final MiddleExecutor<SparkContext, RDD<String>, DirtyConfig> middle = new DirtyMiddleExecutor();
-        final SinkExecutor<SparkContext, RDD<String>, FileConfig> sink = new FileSinkExecutor();
-
-        final String inputPath = Objects.requireNonNull(SparkETLTest.class.getClassLoader().getResource("input.txt")).getPath();
-        final String outPutPath = new File(inputPath).getParent().concat("/out");
-        FileUtils.deleteDirectory(new File(outPutPath));
-
-        final FileConfig hdfsSourceConfig = new FileConfig(inputPath);
-        final DirtyConfig dirtyConfig = new DirtyConfig();
-        final FileConfig hdfsSinkConfig = new FileConfig(outPutPath);
-
-        // 初始化
-        final Class<? extends SourceExecutor> sourceClass = source.getClass();
-        final Method init = sourceClass.getMethod("init", sc.getClass(), FileConfig.class);
-        init.invoke(source, sc, hdfsSourceConfig);
-
-        final Class<? extends MiddleExecutor> middleClass = middle.getClass();
-        final Method init2 = middleClass.getMethod("init", sc.getClass(), DirtyConfig.class);
-        init2.invoke(middle, sc, dirtyConfig);
-
-        final Class<? extends SinkExecutor> sinkClass = sink.getClass();
-        final Method init3 = sinkClass.getMethod("init", sc.getClass(), FileConfig.class);
-        init3.invoke(sink, sc, hdfsSinkConfig);
-
-        // 执行
-        final Method process = sourceClass.getMethod("process", sc.getClass(), FileConfig.class);
-        final Object result1 = process.invoke(source, sc, hdfsSourceConfig);
-
-        final Method process2 = middleClass.getMethod("process", Collection.class, DirtyConfig.class);
-        final Object result2 = process2.invoke(middle, result1, dirtyConfig);
-
-        final Method process3 = sinkClass.getMethod("process", Collection.class, FileConfig.class);
-        process3.invoke(sink, result2, hdfsSinkConfig);
     }
 
 }

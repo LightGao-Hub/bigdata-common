@@ -1,14 +1,16 @@
 package org.bigdata.etl.common.context;
 // CHECKSTYLE:OFF
 import static org.bigdata.etl.common.enums.CommonConstants.EXECUTOR_CHECK;
+import static org.bigdata.etl.common.enums.CommonConstants.FIRST;
 import static org.bigdata.etl.common.enums.CommonConstants.SECOND;
+import static org.bigdata.etl.common.enums.CommonConstants.THIRD;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,6 @@ import org.bigdata.etl.common.executors.SourceExecutor;
 import org.bigdata.etl.common.model.ETLJSONContext;
 import org.bigdata.etl.common.model.ETLJSONNode;
 import org.bigdata.etl.common.utils.JacksonUtils;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 
 /**
@@ -43,15 +44,15 @@ import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
  */
 @ToString
 @Slf4j
-public class ETLContext<E, D> implements Serializable {
+public class ETLContext<E> implements Serializable {
     private final E engine;
     private final String etlJson;
     private final Class<?> application;
     private final ETLJSONContext jsonContext;
     private final Map<String, String> executorConfigMap = new HashMap<>();
-    private final Map<String, SourceExecutor<E, D, ? extends ExecutorConfig>> sourceMap = new HashMap<>();
-    private final Map<String, MiddleExecutor<E, D, ? extends ExecutorConfig>> middleMap = new HashMap<>();
-    private final Map<String, SinkExecutor<E, D, ? extends ExecutorConfig>> sinkMap = new HashMap<>();
+    private final Map<String, SourceExecutor<E, ?, ? extends ExecutorConfig>> sourceMap = new HashMap<>();
+    private final Map<String, MiddleExecutor<E, ?, ?, ? extends ExecutorConfig>> middleMap = new HashMap<>();
+    private final Map<String, SinkExecutor<E, ?, ? extends ExecutorConfig>> sinkMap = new HashMap<>();
 
     public ETLContext(Class<?> application, E engine, String etlJson) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         this.engine = engine;
@@ -61,7 +62,8 @@ public class ETLContext<E, D> implements Serializable {
     }
 
     // 执行etl
-    public void start() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void start() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
+            ClassNotFoundException {
         invokeCheck();
         invokeInit();
         invokeProcess();
@@ -73,14 +75,14 @@ public class ETLContext<E, D> implements Serializable {
 
     private void invokeCheck() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         final ETLJSONNode source = jsonContext.getSource();
-        final SourceExecutor<E, D, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
+        final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
         final Method souceMethod = sourceExecutor.getClass().getMethod(EXECUTOR_CHECK, source.getJsonObject().getClass());
         boolean invoke = (boolean) souceMethod.invoke(sourceExecutor, source.getJsonObject());
         checkError(invoke, ProcessType.SOURCE, source.getProcessType());
 
         final List<ETLJSONNode> middleList = jsonContext.getMiddles();
         for (ETLJSONNode middle : middleList) {
-            final MiddleExecutor<E, D, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
+            final MiddleExecutor<E, ?, ?, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
             final Method middleMethod = middleExecutor.getClass().getMethod(EXECUTOR_CHECK, middle.getJsonObject().getClass());
             invoke = (boolean) middleMethod.invoke(middleExecutor, middle.getJsonObject());
             checkError(invoke, ProcessType.MIDDLE, middle.getProcessType());
@@ -88,7 +90,7 @@ public class ETLContext<E, D> implements Serializable {
 
         final List<ETLJSONNode> sinkList = jsonContext.getSinks();
         for (ETLJSONNode sink : sinkList) {
-            final SinkExecutor<E, D, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
+            final SinkExecutor<E, ?, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
             final Method sinkMethod = sinkExecutor.getClass().getMethod(EXECUTOR_CHECK, sink.getJsonObject().getClass());
             invoke = (boolean) sinkMethod.invoke(sinkExecutor, sink.getJsonObject());
             checkError(invoke, ProcessType.SINK, sink.getProcessType());
@@ -101,7 +103,7 @@ public class ETLContext<E, D> implements Serializable {
 
     private void initOrClose(ExecutorType executorType) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         final ETLJSONNode source = jsonContext.getSource();
-        final SourceExecutor<E, D, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
+        final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
         final Method souceMethod = sourceExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
                 source.getJsonObject().getClass());
         souceMethod.invoke(sourceExecutor, engine, source.getJsonObject());
@@ -109,7 +111,7 @@ public class ETLContext<E, D> implements Serializable {
 
         final List<ETLJSONNode> middleList = jsonContext.getMiddles();
         for (ETLJSONNode middle : middleList) {
-            final MiddleExecutor<E, D, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
+            final MiddleExecutor<E, ?, ?, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
             final Method middleMethod = middleExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
                     middle.getJsonObject().getClass());
             middleMethod.invoke(middleExecutor, engine, middle.getJsonObject());
@@ -118,7 +120,7 @@ public class ETLContext<E, D> implements Serializable {
 
         final List<ETLJSONNode> sinkList = jsonContext.getSinks();
         for (ETLJSONNode sink : sinkList) {
-            final SinkExecutor<E, D, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
+            final SinkExecutor<E, ?, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
             final Method sinkMethod = sinkExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
                     sink.getJsonObject().getClass());
             sinkMethod.invoke(sinkExecutor, engine, sink.getJsonObject());
@@ -126,9 +128,10 @@ public class ETLContext<E, D> implements Serializable {
         }
     }
 
-    private void invokeProcess() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    private void invokeProcess() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException,
+            ClassNotFoundException {
         final ETLJSONNode source = jsonContext.getSource();
-        final SourceExecutor<E, D, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
+        final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
         final Method souceMethod = sourceExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(),
                 source.getJsonObject().getClass());
         Object invokeResult = souceMethod.invoke(sourceExecutor, engine, source.getJsonObject());
@@ -136,19 +139,21 @@ public class ETLContext<E, D> implements Serializable {
 
         final List<ETLJSONNode> middleList = jsonContext.getMiddles();
         for (ETLJSONNode middle : middleList) {
-            final MiddleExecutor<E, D, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
-            final Method middleMethod = middleExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), Collection.class,
+            final MiddleExecutor<E, ?, ?, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
+            final String inputClassName = getConfig(middleExecutor.getClass(), FIRST);
+            final Method middleMethod = middleExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(), Class.forName(inputClassName),
                     middle.getJsonObject().getClass());
-            invokeResult = middleMethod.invoke(middleExecutor, invokeResult, middle.getJsonObject());
+            invokeResult = middleMethod.invoke(middleExecutor, engine, invokeResult, middle.getJsonObject());
             log.info("middle[{}] process success,  result: {}", middle.getProcessType(), invokeResult);
         }
 
         final List<ETLJSONNode> sinkList = jsonContext.getSinks();
         for (ETLJSONNode sink : sinkList) {
-            final SinkExecutor<E, D, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
-            final Method sinkMethod = sinkExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), Collection.class,
+            final SinkExecutor<E, ?, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
+            final String inputClassName = getConfig(sinkExecutor.getClass(), FIRST);
+            final Method sinkMethod = sinkExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(), Class.forName(inputClassName),
                     sink.getJsonObject().getClass());
-            sinkMethod.invoke(sinkExecutor, invokeResult, sink.getJsonObject());
+            sinkMethod.invoke(sinkExecutor, engine, invokeResult, sink.getJsonObject());
             log.info("sink[{}], process success", sink.getProcessType());
         }
     }
@@ -198,18 +203,18 @@ public class ETLContext<E, D> implements Serializable {
             for (Class<?> interfaced : interfaces) {
                 switch (interfaced.getSimpleName()) {
                     case "SourceExecutor":
-                        sourceMap.put(processType, (SourceExecutor<E, D, ExecutorConfig>) clz.newInstance());
-                        executorConfigMap.put(processType, getConfig(clz));
+                        sourceMap.put(processType, (SourceExecutor<E, ?, ExecutorConfig>) clz.newInstance());
+                        executorConfigMap.put(processType, getConfig(clz, SECOND));
                         include = true;
                         break;
                     case "MiddleExecutor":
-                        middleMap.put(processType, (MiddleExecutor<E, D, ExecutorConfig>) clz.newInstance());
-                        executorConfigMap.put(processType, getConfig(clz));
+                        middleMap.put(processType, (MiddleExecutor<E, ?, ?, ExecutorConfig>) clz.newInstance());
+                        executorConfigMap.put(processType, getConfig(clz, THIRD));
                         include = true;
                         break;
                     case "SinkExecutor":
-                        sinkMap.put(processType, (SinkExecutor<E, D, ExecutorConfig>) clz.newInstance());
-                        executorConfigMap.put(processType, getConfig(clz));
+                        sinkMap.put(processType, (SinkExecutor<E, ?, ExecutorConfig>) clz.newInstance());
+                        executorConfigMap.put(processType, getConfig(clz, SECOND));
                         include = true;
                         break;
                     default:
@@ -227,21 +232,29 @@ public class ETLContext<E, D> implements Serializable {
         return buildJson();
     }
 
-    // 根据executorClass, 获取config泛型全限定类名
-    private String getConfig(Class<?> executorClass) {
+    /**
+     * 根据executorClass和泛型位置, 获取对应的泛型全限定类名
+     * 此函数通过嵌套判断来解决泛型中嵌套泛型, 例如MiddleExecutor[SparkSession, RDD[String], x, x], 虽然获取到了RDD[String], 但org.apache.spark.rdd.RDD<java.lang.String>字符串在外界class.forName无法反射
+     * 因此需要获取内部 RDD的className = org.apache.spark.rdd.RDD
+     */
+    private String getConfig(Class<?> executorClass, int number) {
         final Type[] genericInterfaces = executorClass.getGenericInterfaces();
         String configName = null;
         for (Type genericInterface : genericInterfaces) {
-            if (genericInterface instanceof ParameterizedTypeImpl) {
-                final ParameterizedTypeImpl parameterizedTypeImpl = (ParameterizedTypeImpl) genericInterface;
-                final Type actualTypeArgument = parameterizedTypeImpl.getActualTypeArguments()[SECOND];
-                configName = actualTypeArgument.getTypeName();
+            if (genericInterface instanceof ParameterizedType) {
+                final ParameterizedType parameterizedType = (ParameterizedType) genericInterface;
+                Type actualTypeArgument = parameterizedType.getActualTypeArguments()[number];
+                if (actualTypeArgument instanceof ParameterizedType) {
+                    configName = ((ParameterizedType) actualTypeArgument).getRawType().getTypeName();
+                } else {
+                    configName = actualTypeArgument.getTypeName();
+                }
                 log.debug("getConfig[{}], configName: {} ", executorClass, configName);
             }
         }
         if (configName == null) {
-            String processType = executorClass.getAnnotation(ETLExecutor.class).value();
-            throw new RuntimeException(String.format("executor[%s] config is not find", processType));
+            String processType2 = executorClass.getAnnotation(ETLExecutor.class).value();
+            throw new RuntimeException(String.format("executor[%s] config is not find", processType2));
         }
         return configName;
     }

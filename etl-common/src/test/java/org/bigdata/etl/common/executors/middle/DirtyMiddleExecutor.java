@@ -17,7 +17,7 @@ import java.util.Optional;
  */
 @Slf4j
 @ETLExecutor("dirty")
-public class DirtyMiddleExecutor implements MiddleExecutor<SparkContext, RDD<String>, DirtyConfig> {
+public class DirtyMiddleExecutor implements MiddleExecutor<SparkContext, RDD<String>, RDD<String>, DirtyConfig> {
 
     @Override
     public void init(SparkContext engine, DirtyConfig config) {
@@ -25,11 +25,9 @@ public class DirtyMiddleExecutor implements MiddleExecutor<SparkContext, RDD<Str
     }
 
     @Override
-    public Collection<RDD<String>> process(Collection<RDD<String>> dataCollection, DirtyConfig config) {
-        log.info("DirtyMiddle process, config: {}", config);
-        final Optional<RDD<String>> first = dataCollection.stream().findFirst();
-        first.ifPresent((rdd) -> log.info("middle collect: {}", (Object) rdd.collect()));
-        return dataCollection;
+    public RDD<String> process(SparkContext engine, RDD<String> value, DirtyConfig config) {
+        log.info("DirtyMiddle process, config: {}, middle collect: {}", config, value.collect());
+        return value;
     }
 
     @Override

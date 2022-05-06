@@ -20,6 +20,7 @@ public enum CommonConstants {
     public static final String EXECUTOR_CLOSE = "close";
 
     public static final String EMPTY_STRING = "";
+    public static final String SPLIT_STRING = ",";
 
     public static final long MILLISECOND = 1000;
     public static final long HEARTBEAT_INTERVAL = 30 * 1000;
