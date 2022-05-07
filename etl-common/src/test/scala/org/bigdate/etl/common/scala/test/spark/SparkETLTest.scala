@@ -34,8 +34,7 @@ class SparkETLTest {
   @Test
   @throws[Exception]
   def start(): Unit = {
-    val etlContext = new ETLContext[SparkSession](classOf[SparkETLTest], spark, jsonStr)
-    etlContext.start()
+    new ETLContext[SparkSession](classOf[SparkETLTest], spark, jsonStr)
   }
 
 

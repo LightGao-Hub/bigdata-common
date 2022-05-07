@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
@@ -188,6 +189,31 @@ public class TestRedisson {
         log.info("zrpop sortKey: {}, value: {}", sortKey, redissonUtils.zrpop(sortKey));
         log.info("redissonSortedSet process end, del sortKey: {}, boolean: {}", sortKey, redissonUtils.del(sortKey));
         log.info("------------>");
+    }
+
+    /**
+     * 测试lua脚本
+     */
+    @Test
+    public void redissonLua() {
+        final String waitQueue = "test:pillar:queue:low";
+        final String executorQueue = "test:pillar:queue:execlow";
+        final String resultQueue = "test:pillar:queue:resultlow";
+        log.info("remove waitQueue: {} result:{}, executorQueue: {} result: {}, resultQueue:{} result: {}", waitQueue,
+                redissonUtils.del(waitQueue), executorQueue, redissonUtils.del(executorQueue), resultQueue, redissonUtils.del(resultQueue));
+
+        redissonUtils.zadd(waitQueue, FIRST, SECOND);
+        redissonUtils.zadd(waitQueue, SECOND, THIRD);
+
+        final String slaveConsumeLua = "local queues = {KEYS[1], KEYS[2], KEYS[3]} for i = 1, #queues do local value = redis.call('ZRANGE',queues[i],ARGV[1],ARGV[2],'WITHSCORES') if value[1] ~= nil then redis.call('ZADD',KEYS[4],value[2],value[1]) redis.call('ZREM',queues[i],value[1]) return value[1] end end";
+        final List<Object> keys = Arrays.asList("test:pillar:queue:high", waitQueue, "test:pillar:queue:middle", executorQueue);
+        final Optional<Integer> eval = redissonUtils.eval(RScript.Mode.READ_WRITE, slaveConsumeLua, keys, -1, -1);
+        log.info("redissonLua eval: {}", eval);
+
+        final String masterConsumeLua = "local value = redis.call('ZRANGE',KEYS[1],ARGV[1],ARGV[2],'WITHSCORES') if value[1] ~= nil then redis.call('ZADD',KEYS[2],value[2],value[1]) redis.call('ZREM',KEYS[1],value[1]) return value[1] end";
+        final List<Object> keys2 = Arrays.asList(waitQueue, resultQueue);
+        final Optional<Integer> eval2 = redissonUtils.eval(RScript.Mode.READ_WRITE, masterConsumeLua, keys2, -1, -1);
+        log.info("redissonLua eval2: {}", eval2);
     }
 
     /**

@@ -50,8 +50,7 @@ public class SparkETLTest {
 
     @Test
     public void start() throws Exception {
-        final ETLContext<SparkContext> etlContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
-        etlContext.start();
+        new ETLContext<>(SparkETLTest.class, sc, jsonStr);
     }
 
     @Test

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RQueue;
 import org.redisson.api.RScoredSortedSet;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.protocol.ScoredEntry;
 
@@ -369,6 +371,21 @@ public final class RedissonUtils {
             this.score = scoredEntry.getScore();
             this.value = scoredEntry.getValue();
         }
+    }
+
+    //-------------------------------redis-lua-----------------------------
+
+    /**
+     * 执行lua脚本
+     * @param mode - execution mode
+     * @param lua - lua script
+     * @param keys - keys available through KEYS param in script
+     * @param values - values available through VALUES param in script
+     */
+    public <V> Optional<V> eval(RScript.Mode mode, String lua, List<Object> keys, Object... values) {
+        final RScript script = redisson.getScript();
+        final V eval = script.eval(mode, lua, RScript.ReturnType.VALUE, keys, values);
+        return Objects.nonNull(eval) ? Optional.of(eval) : Optional.empty();
     }
 
     //-------------------------------redis-分布式锁-----------------------------------

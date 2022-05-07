@@ -54,15 +54,16 @@ public class ETLContext<E> implements Serializable {
     private final Map<String, MiddleExecutor<E, ?, ?, ? extends ExecutorConfig>> middleMap = new HashMap<>();
     private final Map<String, SinkExecutor<E, ?, ? extends ExecutorConfig>> sinkMap = new HashMap<>();
 
-    public ETLContext(Class<?> application, E engine, String etlJson) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public ETLContext(Class<?> application, E engine, String etlJson) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
         this.engine = engine;
         this.etlJson = etlJson;
         this.application = application;
         this.jsonContext = buildExecutor();   // 1、构建项目中所有执行map 2、将etlJson字符串转化成上下文
+        start();
     }
 
     // 执行etl
-    public void start() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
+    private void start() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
             ClassNotFoundException {
         invokeCheck();
         invokeInit();
@@ -76,8 +77,8 @@ public class ETLContext<E> implements Serializable {
     private void invokeCheck() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         final ETLJSONNode source = jsonContext.getSource();
         final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
-        final Method souceMethod = sourceExecutor.getClass().getMethod(EXECUTOR_CHECK, source.getJsonObject().getClass());
-        boolean invoke = (boolean) souceMethod.invoke(sourceExecutor, source.getJsonObject());
+        final Method sourceMethod = sourceExecutor.getClass().getMethod(EXECUTOR_CHECK, source.getJsonObject().getClass());
+        boolean invoke = (boolean) sourceMethod.invoke(sourceExecutor, source.getJsonObject());
         checkError(invoke, ProcessType.SOURCE, source.getProcessType());
 
         final List<ETLJSONNode> middleList = jsonContext.getMiddles();
