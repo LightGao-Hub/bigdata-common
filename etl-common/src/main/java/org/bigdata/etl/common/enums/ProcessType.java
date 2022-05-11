@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public enum ProcessType {
     SOURCE(CommonConstants.SOURCE),
-    MIDDLE(CommonConstants.MIDDLE),
+    TRANSFORM(CommonConstants.TRANSFORM),
     SINK(CommonConstants.SINK);
 
     private final String processType;

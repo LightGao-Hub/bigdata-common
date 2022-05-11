@@ -1,5 +1,6 @@
 package org.bigdata.etl.common.context;
-// CHECKSTYLE:OFF
+
+import static org.bigdata.etl.common.enums.CommonConstants.EMPTY_JSON_STRING;
 import static org.bigdata.etl.common.enums.CommonConstants.EXECUTOR_CHECK;
 import static org.bigdata.etl.common.enums.CommonConstants.FIRST;
 import static org.bigdata.etl.common.enums.CommonConstants.SECOND;
@@ -17,21 +18,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.bigdata.etl.common.annotations.ETLExecutor;
-
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.reflections.Reflections;
-import org.bigdata.etl.common.configs.ExecutorConfig;
+import org.bigdata.etl.common.annotations.ETLExecutor;
+import org.bigdata.etl.common.configs.NilExecutorConfig;
 import org.bigdata.etl.common.enums.ExecutorType;
 import org.bigdata.etl.common.enums.ProcessType;
-import org.bigdata.etl.common.executors.MiddleExecutor;
+import org.bigdata.etl.common.exceptions.AnnotationInterfaceMismatchException;
+import org.bigdata.etl.common.exceptions.BuildContextException;
+import org.bigdata.etl.common.exceptions.ETLStartException;
+import org.bigdata.etl.common.exceptions.ExecutorCheckException;
+import org.bigdata.etl.common.exceptions.ExecutorConfigNotFoundException;
+import org.bigdata.etl.common.exceptions.ExecutorProcessTypeNotFoundException;
+import org.bigdata.etl.common.exceptions.JsonTypeLackException;
+import org.bigdata.etl.common.exceptions.LeastSourceSinkException;
 import org.bigdata.etl.common.executors.SinkExecutor;
 import org.bigdata.etl.common.executors.SourceExecutor;
+import org.bigdata.etl.common.executors.TransformExecutor;
 import org.bigdata.etl.common.model.ETLJSONContext;
 import org.bigdata.etl.common.model.ETLJSONNode;
 import org.bigdata.etl.common.utils.JacksonUtils;
-
+import org.reflections.Reflections;
 
 /**
  *  ETL上下文构建类, 泛型需和各个接口的实现保持一致
@@ -50,24 +57,30 @@ public class ETLContext<E> implements Serializable {
     private final Class<?> application;
     private final ETLJSONContext jsonContext;
     private final Map<String, String> executorConfigMap = new HashMap<>();
-    private final Map<String, SourceExecutor<E, ?, ? extends ExecutorConfig>> sourceMap = new HashMap<>();
-    private final Map<String, MiddleExecutor<E, ?, ?, ? extends ExecutorConfig>> middleMap = new HashMap<>();
-    private final Map<String, SinkExecutor<E, ?, ? extends ExecutorConfig>> sinkMap = new HashMap<>();
+    private final Map<String, SourceExecutor<E, ?, ? extends Serializable>> sourceMap = new HashMap<>();
+    private final Map<String, TransformExecutor<E, ?, ?, ? extends Serializable>> transformMap = new HashMap<>();
+    private final Map<String, SinkExecutor<E, ?, ? extends Serializable>> sinkMap = new HashMap<>();
 
-    public ETLContext(Class<?> application, E engine, String etlJson) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
-        this.engine = engine;
-        this.etlJson = etlJson;
-        this.application = application;
-        this.jsonContext = buildExecutor();   // 1、构建项目中所有执行map 2、将etlJson字符串转化成上下文
-        start();
+    public ETLContext(Class<?> application, E engine, String etlJson) throws BuildContextException {
+        try {
+            this.engine = engine;
+            this.etlJson = etlJson;
+            this.application = application;
+            this.jsonContext = buildExecutor();   // 1、构建项目中所有执行map 2、将etlJson字符串转化成上下文
+        } catch (Exception e) {
+            throw new BuildContextException("etlContext build error", e);
+        }
     }
 
     // 执行etl
-    private void start() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
-            ClassNotFoundException {
-        invokeCheck();
-        invokeInit();
-        invokeProcess();
+    public void start() throws ETLStartException {
+        try {
+            invokeCheck();
+            invokeInit();
+            invokeProcess();
+        } catch (Exception e) {
+            throw new ETLStartException("etl start error", e);
+        }
     }
 
     public void close() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
@@ -76,24 +89,24 @@ public class ETLContext<E> implements Serializable {
 
     private void invokeCheck() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         final ETLJSONNode source = jsonContext.getSource();
-        final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
-        final Method sourceMethod = sourceExecutor.getClass().getMethod(EXECUTOR_CHECK, source.getJsonObject().getClass());
-        boolean invoke = (boolean) sourceMethod.invoke(sourceExecutor, source.getJsonObject());
+        final SourceExecutor<E, ?, ? extends Serializable> sourceExecutor = sourceMap.get(source.getProcessType());
+        final Method sourceMethod = sourceExecutor.getClass().getMethod(EXECUTOR_CHECK, source.getConfig().getClass());
+        boolean invoke = (boolean) sourceMethod.invoke(sourceExecutor, source.getConfig());
         checkError(invoke, ProcessType.SOURCE, source.getProcessType());
 
-        final List<ETLJSONNode> middleList = jsonContext.getMiddles();
-        for (ETLJSONNode middle : middleList) {
-            final MiddleExecutor<E, ?, ?, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
-            final Method middleMethod = middleExecutor.getClass().getMethod(EXECUTOR_CHECK, middle.getJsonObject().getClass());
-            invoke = (boolean) middleMethod.invoke(middleExecutor, middle.getJsonObject());
-            checkError(invoke, ProcessType.MIDDLE, middle.getProcessType());
+        final List<ETLJSONNode> transformList = jsonContext.getTransforms();
+        for (ETLJSONNode transform : transformList) {
+            final TransformExecutor<E, ?, ?, ? extends Serializable> transformExecutor = transformMap.get(transform.getProcessType());
+            final Method transformMethod = transformExecutor.getClass().getMethod(EXECUTOR_CHECK, transform.getConfig().getClass());
+            invoke = (boolean) transformMethod.invoke(transformExecutor, transform.getConfig());
+            checkError(invoke, ProcessType.TRANSFORM, transform.getProcessType());
         }
 
         final List<ETLJSONNode> sinkList = jsonContext.getSinks();
         for (ETLJSONNode sink : sinkList) {
-            final SinkExecutor<E, ?, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
-            final Method sinkMethod = sinkExecutor.getClass().getMethod(EXECUTOR_CHECK, sink.getJsonObject().getClass());
-            invoke = (boolean) sinkMethod.invoke(sinkExecutor, sink.getJsonObject());
+            final SinkExecutor<E, ?, ? extends Serializable> sinkExecutor = sinkMap.get(sink.getProcessType());
+            final Method sinkMethod = sinkExecutor.getClass().getMethod(EXECUTOR_CHECK, sink.getConfig().getClass());
+            invoke = (boolean) sinkMethod.invoke(sinkExecutor, sink.getConfig());
             checkError(invoke, ProcessType.SINK, sink.getProcessType());
         }
     }
@@ -104,27 +117,27 @@ public class ETLContext<E> implements Serializable {
 
     private void initOrClose(ExecutorType executorType) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         final ETLJSONNode source = jsonContext.getSource();
-        final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
+        final SourceExecutor<E, ?, ? extends Serializable> sourceExecutor = sourceMap.get(source.getProcessType());
         final Method souceMethod = sourceExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
-                source.getJsonObject().getClass());
-        souceMethod.invoke(sourceExecutor, engine, source.getJsonObject());
+                source.getConfig().getClass());
+        souceMethod.invoke(sourceExecutor, engine, source.getConfig());
         log.info("source[{}] {} success ", source.getProcessType(), executorType.getExecutorType());
 
-        final List<ETLJSONNode> middleList = jsonContext.getMiddles();
-        for (ETLJSONNode middle : middleList) {
-            final MiddleExecutor<E, ?, ?, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
-            final Method middleMethod = middleExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
-                    middle.getJsonObject().getClass());
-            middleMethod.invoke(middleExecutor, engine, middle.getJsonObject());
-            log.info("middle[{}] {} success ", middle.getProcessType(), executorType.getExecutorType());
+        final List<ETLJSONNode> transformList = jsonContext.getTransforms();
+        for (ETLJSONNode transform : transformList) {
+            final TransformExecutor<E, ?, ?, ? extends Serializable> transformExecutor = transformMap.get(transform.getProcessType());
+            final Method transformMethod = transformExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
+                    transform.getConfig().getClass());
+            transformMethod.invoke(transformExecutor, engine, transform.getConfig());
+            log.info("transform[{}] {} success ", transform.getProcessType(), executorType.getExecutorType());
         }
 
         final List<ETLJSONNode> sinkList = jsonContext.getSinks();
         for (ETLJSONNode sink : sinkList) {
-            final SinkExecutor<E, ?, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
+            final SinkExecutor<E, ?, ? extends Serializable> sinkExecutor = sinkMap.get(sink.getProcessType());
             final Method sinkMethod = sinkExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
-                    sink.getJsonObject().getClass());
-            sinkMethod.invoke(sinkExecutor, engine, sink.getJsonObject());
+                    sink.getConfig().getClass());
+            sinkMethod.invoke(sinkExecutor, engine, sink.getConfig());
             log.info("sink[{}] {} success ", sink.getProcessType(), executorType.getExecutorType());
         }
     }
@@ -132,36 +145,36 @@ public class ETLContext<E> implements Serializable {
     private void invokeProcess() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException,
             ClassNotFoundException {
         final ETLJSONNode source = jsonContext.getSource();
-        final SourceExecutor<E, ?, ? extends ExecutorConfig> sourceExecutor = sourceMap.get(source.getProcessType());
+        final SourceExecutor<E, ?, ? extends Serializable> sourceExecutor = sourceMap.get(source.getProcessType());
         final Method souceMethod = sourceExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(),
-                source.getJsonObject().getClass());
-        Object invokeResult = souceMethod.invoke(sourceExecutor, engine, source.getJsonObject());
+                source.getConfig().getClass());
+        Object invokeResult = souceMethod.invoke(sourceExecutor, engine, source.getConfig());
         log.info("source[{}] process success, result: {}", source.getProcessType(), invokeResult);
 
-        final List<ETLJSONNode> middleList = jsonContext.getMiddles();
-        for (ETLJSONNode middle : middleList) {
-            final MiddleExecutor<E, ?, ?, ? extends ExecutorConfig> middleExecutor = middleMap.get(middle.getProcessType());
-            final String inputClassName = getConfig(middleExecutor.getClass(), FIRST);
-            final Method middleMethod = middleExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(), Class.forName(inputClassName),
-                    middle.getJsonObject().getClass());
-            invokeResult = middleMethod.invoke(middleExecutor, engine, invokeResult, middle.getJsonObject());
-            log.info("middle[{}] process success,  result: {}", middle.getProcessType(), invokeResult);
+        final List<ETLJSONNode> transformList = jsonContext.getTransforms();
+        for (ETLJSONNode transform : transformList) {
+            final TransformExecutor<E, ?, ?, ? extends Serializable> transformExecutor = transformMap.get(transform.getProcessType());
+            final String inputClassName = getConfig(transformExecutor.getClass(), FIRST);
+            final Method transformMethod = transformExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(),
+                    Class.forName(inputClassName), transform.getConfig().getClass());
+            invokeResult = transformMethod.invoke(transformExecutor, engine, invokeResult, transform.getConfig());
+            log.info("transform[{}] process success,  result: {}", transform.getProcessType(), invokeResult);
         }
 
         final List<ETLJSONNode> sinkList = jsonContext.getSinks();
         for (ETLJSONNode sink : sinkList) {
-            final SinkExecutor<E, ?, ? extends ExecutorConfig> sinkExecutor = sinkMap.get(sink.getProcessType());
+            final SinkExecutor<E, ?, ? extends Serializable> sinkExecutor = sinkMap.get(sink.getProcessType());
             final String inputClassName = getConfig(sinkExecutor.getClass(), FIRST);
-            final Method sinkMethod = sinkExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(), Class.forName(inputClassName),
-                    sink.getJsonObject().getClass());
-            sinkMethod.invoke(sinkExecutor, engine, invokeResult, sink.getJsonObject());
+            final Method sinkMethod = sinkExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(),
+                    Class.forName(inputClassName), sink.getConfig().getClass());
+            sinkMethod.invoke(sinkExecutor, engine, invokeResult, sink.getConfig());
             log.info("sink[{}], process success", sink.getProcessType());
         }
     }
 
     private void checkError(boolean invoke, ProcessType processType, String processTypeStr) {
         if (!invoke) {
-            throw new RuntimeException(String.format("check error, processType: %s, processTypeStr: %s", processType, processTypeStr));
+            throw new ExecutorCheckException(String.format("check error, processType: %s, processTypeStr: %s", processType, processTypeStr));
         }
         log.info("{}[{}], check success", processType.getProcessType(), processTypeStr);
     }
@@ -170,24 +183,24 @@ public class ETLContext<E> implements Serializable {
         assert etlJson != null;
         final Map<String, Object> stringObjectMap = JacksonUtils.jsonToMap(etlJson);
         if (!stringObjectMap.containsKey(ProcessType.SOURCE.getProcessType()) || !stringObjectMap.containsKey(ProcessType.SINK.getProcessType())) {
-            throw new RuntimeException(String.format("etlJson error, source/sink is null etlJson: %s", etlJson));
+            throw new JsonTypeLackException(String.format("etlJson error, source/sink is null etlJson: %s", etlJson));
         }
         final Object sourceValue = stringObjectMap.get(ProcessType.SOURCE.getProcessType());
         final ETLJSONNode source = getJsonNode(sourceValue);
         log.info("buildJson-source: {}", source);
 
-        List<ETLJSONNode> middles = null; // 用户可以不使用middle
-        if (stringObjectMap.containsKey(ProcessType.MIDDLE.getProcessType())) {
-            final Object middleValue = stringObjectMap.get(ProcessType.MIDDLE.getProcessType());
-            middles = getListJsonNode(middleValue);
-            log.info("buildJson-middles: {}", middles);
+        List<ETLJSONNode> transforms = null; // 用户可以不使用transform
+        if (stringObjectMap.containsKey(ProcessType.TRANSFORM.getProcessType())) {
+            final Object transformValue = stringObjectMap.get(ProcessType.TRANSFORM.getProcessType());
+            transforms = getListJsonNode(transformValue);
+            log.info("buildJson-transforms: {}", transforms);
         }
 
         final Object sinkValue = stringObjectMap.get(ProcessType.SINK.getProcessType());
         final List<ETLJSONNode> sinks = getListJsonNode(sinkValue);
         log.info("buildJson-sinks: {}", sinks);
 
-        return new ETLJSONContext(source, middles, sinks);
+        return new ETLJSONContext(source, transforms, sinks);
     }
 
 
@@ -204,17 +217,17 @@ public class ETLContext<E> implements Serializable {
             for (Class<?> interfaced : interfaces) {
                 switch (interfaced.getSimpleName()) {
                     case "SourceExecutor":
-                        sourceMap.put(processType, (SourceExecutor<E, ?, ExecutorConfig>) clz.newInstance());
+                        sourceMap.put(processType, (SourceExecutor<E, ?, Serializable>) clz.newInstance());
                         executorConfigMap.put(processType, getConfig(clz, SECOND));
                         include = true;
                         break;
-                    case "MiddleExecutor":
-                        middleMap.put(processType, (MiddleExecutor<E, ?, ?, ExecutorConfig>) clz.newInstance());
+                    case "TransformExecutor":
+                        transformMap.put(processType, (TransformExecutor<E, ?, ?, Serializable>) clz.newInstance());
                         executorConfigMap.put(processType, getConfig(clz, THIRD));
                         include = true;
                         break;
                     case "SinkExecutor":
-                        sinkMap.put(processType, (SinkExecutor<E, ?, ExecutorConfig>) clz.newInstance());
+                        sinkMap.put(processType, (SinkExecutor<E, ?, Serializable>) clz.newInstance());
                         executorConfigMap.put(processType, getConfig(clz, SECOND));
                         include = true;
                         break;
@@ -223,11 +236,11 @@ public class ETLContext<E> implements Serializable {
                 }
             }
             if (!include) {
-                throw new RuntimeException(" Using annotations but not implementing interfaces: ETLSource/ETLMiddle/ETLSink ");
+                throw new AnnotationInterfaceMismatchException(" Using annotations but not implementing interfaces: ETLSource/ETLtransform/ETLSink ");
             }
         }
         if (sourceMap.isEmpty() || sinkMap.isEmpty()) {
-            throw new RuntimeException(String.format(" sourceMap/sinkMap Length less than 1, sourceMap-length: %s, sinkMap-length: %s",
+            throw new LeastSourceSinkException(String.format(" sourceMap/sinkMap Length less than 1, sourceMap-length: %s, sinkMap-length: %s",
                     sourceMap.size(), sinkMap.size()));
         }
         return buildJson();
@@ -235,7 +248,8 @@ public class ETLContext<E> implements Serializable {
 
     /**
      * 根据executorClass和泛型位置, 获取对应的泛型全限定类名
-     * 此函数通过嵌套判断来解决泛型中嵌套泛型, 例如MiddleExecutor[SparkSession, RDD[String], x, x], 虽然获取到了RDD[String], 但org.apache.spark.rdd.RDD<java.lang.String>字符串在外界class.forName无法反射
+     * 此函数通过嵌套判断来解决泛型中嵌套泛型, 例如transformExecutor[SparkSession, RDD[String], x, x], 虽然获取到了RDD[String],
+     * 但org.apache.spark.rdd.RDD<java.lang.String>字符串在外界class.forName无法反射
      * 因此需要获取内部 RDD的className = org.apache.spark.rdd.RDD
      */
     private String getConfig(Class<?> executorClass, int number) {
@@ -250,12 +264,12 @@ public class ETLContext<E> implements Serializable {
                 } else {
                     configName = actualTypeArgument.getTypeName();
                 }
-                log.debug("getConfig[{}], configName: {} ", executorClass, configName);
+                log.info("getConfig[{}], configName: {} ", executorClass, configName);
             }
         }
         if (configName == null) {
-            String processType2 = executorClass.getAnnotation(ETLExecutor.class).value();
-            throw new RuntimeException(String.format("executor[%s] config is not find", processType2));
+            throw new ExecutorConfigNotFoundException(String.format("executor[%s] config is not find",
+                    executorClass.getAnnotation(ETLExecutor.class).value()));
         }
         return configName;
     }
@@ -275,15 +289,20 @@ public class ETLContext<E> implements Serializable {
         ETLJSONNode etlJsonObject = JacksonUtils.convertValue(value, ETLJSONNode.class);
         assert etlJsonObject != null;
         checkJsonTypeExist(etlJsonObject);
-        final Object obj = JacksonUtils.convertValue(value, Class.forName(executorConfigMap.get(etlJsonObject.getProcessType())));
-        etlJsonObject.setJsonObject(obj);
+        Object obj;
+        if (Objects.nonNull(etlJsonObject.getConfig())) {
+            obj = JacksonUtils.convertValue(etlJsonObject.getConfig(), Class.forName(executorConfigMap.get(etlJsonObject.getProcessType())));
+        } else {
+            obj = JacksonUtils.parseObject(EMPTY_JSON_STRING, NilExecutorConfig.class);
+        }
+        etlJsonObject.setConfig(obj);
         return etlJsonObject;
     }
 
     private void checkJsonTypeExist(ETLJSONNode etlJsonObject) {
-        if (!executorConfigMap.containsKey(etlJsonObject.getProcessType())) {
-            throw new RuntimeException(String.format("etlJson processType[%s] is not found, executorConfigMap: %s", etlJsonObject.getProcessType(),
-                    executorConfigMap));
+        if (!executorConfigMap.containsKey(etlJsonObject.getProcessType()) || !(sourceMap.containsKey(etlJsonObject.getProcessType())
+                || transformMap.containsKey(etlJsonObject.getProcessType()) || sinkMap.containsKey(etlJsonObject.getProcessType()))) {
+            throw new ExecutorProcessTypeNotFoundException(String.format("etlJson processType[%s] is not found", etlJsonObject.getProcessType()));
         }
     }
 

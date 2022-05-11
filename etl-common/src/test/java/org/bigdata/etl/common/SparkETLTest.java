@@ -4,26 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.rdd.RDD;
-import org.bigdata.etl.common.configs.DirtyConfig;
-import org.bigdata.etl.common.configs.FileConfig;
 import org.bigdata.etl.common.context.ETLContext;
-import org.bigdata.etl.common.executors.MiddleExecutor;
-import org.bigdata.etl.common.executors.SinkExecutor;
-import org.bigdata.etl.common.executors.SourceExecutor;
-import org.bigdata.etl.common.executors.source.*;
-import org.bigdata.etl.common.executors.middle.*;
-import org.bigdata.etl.common.executors.sink.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 
@@ -37,9 +24,11 @@ public class SparkETLTest {
     private SparkContext sc;
     private final String inputPath = Objects.requireNonNull(SparkETLTest.class.getClassLoader().getResource("input.txt")).getPath();
     private final String outPutPath = new File(inputPath).getParent().concat("/out");
-    private final String jsonStr = "{\"source\":{\"processType\":\"file\",\"path\":\""+inputPath+"\"},"
-            + "\"middle\":[{\"processType\":\"dirty\",\"dirtyPath\":\"/dirty\"},{\"processType\":\"schema\","
-            + "\"dirtyPath\":\"/dirty2\"}],\"sink\":[{\"processType\":\"file\",\"path\":\""+outPutPath+"\"}]}";
+    private final String dirtyPath = new File(inputPath).getParent().concat("/dirty");
+    private final String jsonStr = String.format("{\"source\":{\"processType\":\"file\","
+                    + "\"config\":{\"path\":\"%s\"}},\"transform\":[{\"processType\":\"dirty2\",\"config\":{\"dirtyPath\":\"%s\"}},"
+                    + "{\"processType\":\"schema\"}],\"sink\":[{\"processType\":\"file\",\"config\":{\"path\":\"%s\"}}]}",
+            inputPath, dirtyPath, outPutPath);
 
     @Before
     public void init() throws IOException {
@@ -50,7 +39,17 @@ public class SparkETLTest {
 
     @Test
     public void start() throws Exception {
-        new ETLContext<>(SparkETLTest.class, sc, jsonStr);
+        ETLContext<SparkContext> sparkContextETLContext = null;
+        try {
+            sparkContextETLContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
+            sparkContextETLContext.start();
+        } catch (Throwable ex) {
+            throw ex; // 这块用户可以根据平台的业务进行异常处理
+        } finally {
+            if (sparkContextETLContext != null) {
+                sparkContextETLContext.close();
+            }
+        }
     }
 
     @Test
@@ -59,18 +58,6 @@ public class SparkETLTest {
         etlContext.close();
     }
 
-    @Test
-    public void sparkDemo() {
-        final RDD<String> stringRDD = sc.textFile(inputPath, 2);
-        final Object collect = stringRDD.collect();
-        log.info("time: {}, collect: {}", System.currentTimeMillis(), collect);
-        final Object collect2 = stringRDD.collect();
-        log.info("time: {}, collect: {}", System.currentTimeMillis(), collect2);
-        final Object collect3 = stringRDD.collect();
-        log.info("time: {}, collect: {}", System.currentTimeMillis(), collect3);
-        final Object collect4 = stringRDD.collect();
-        log.info("time: {}, collect: {}", System.currentTimeMillis(), collect4);
-    }
 
 }
 

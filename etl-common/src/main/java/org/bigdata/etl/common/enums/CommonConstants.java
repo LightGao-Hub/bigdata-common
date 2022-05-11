@@ -10,7 +10,7 @@ public enum CommonConstants {
     ;
 
     public static final String SOURCE = "source";
-    public static final String MIDDLE = "middle";
+    public static final String TRANSFORM = "transform";
     public static final String SINK = "sink";
     public static final String PROCESS_TYPE = "processType";
 
@@ -20,6 +20,7 @@ public enum CommonConstants {
     public static final String EXECUTOR_CLOSE = "close";
 
     public static final String EMPTY_STRING = "";
+    public static final String EMPTY_JSON_STRING = "{}";
     public static final String SPLIT_STRING = ",";
 
     public static final long MILLISECOND = 1000;

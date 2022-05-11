@@ -17,24 +17,55 @@ import org.junit.{Before, Test}
  * Date: 2022-04-28
  */
 class SparkETLTest {
-
   private var spark: SparkSession = _
   private val inputPath = Objects.requireNonNull(classOf[SparkETLTest].getClassLoader.getResource("input.txt")).getPath
+  private val dirtyPath = new File(inputPath).getParent.concat("/dirty")
   private val outPutPath = new File(inputPath).getParent.concat("/out")
-  private val jsonStr = "{\"source\":{\"processType\":\"file\",\"path\":\""+inputPath+"\"},\"middle\":[{\"processType\":\"dirty\",\"dirtyPath\":\"/dirty\"}],\"sink\":[{\"processType\":\"file\",\"path\":\""+outPutPath+"\"}]}"
+  private val etlJson = s"""{
+                           |	"source": {
+                           |		"processType": "file",
+                           |		"config": {
+                           |			"path": "$inputPath"
+                           |		}
+                           |	},
+                           |	"transform": [{
+                           |		"processType": "dirty",
+                           |		"config": {
+                           |			"dirtyPath": "$dirtyPath"
+                           |		}
+                           |	}],
+                           |	"sink": [{
+                           |		"processType": "file",
+                           |		"config": {
+                           |			"path": "$outPutPath"
+                           |		}
+                           |	}]
+                           |}""".stripMargin
+  var etl: ETLContext[SparkSession] = _
+
 
   @Before
   @throws[IOException]
   def init(): Unit = {
     val conf = new SparkConf().setAppName("test scala etl").setMaster("local[2]")
     spark = SparkSession.builder.config(conf).getOrCreate()
+    FileUtils.deleteDirectory(new File(dirtyPath))
     FileUtils.deleteDirectory(new File(outPutPath))
   }
 
   @Test
-  @throws[Exception]
   def start(): Unit = {
-    new ETLContext[SparkSession](classOf[SparkETLTest], spark, jsonStr)
+    try {
+      etl = new ETLContext[SparkSession](classOf[SparkETLTest], spark, etlJson)
+      etl.start()
+    } catch {
+      case ex: Throwable =>
+        throw ex
+    } finally {
+      if (etl != null) {
+        etl.close()
+      }
+    }
   }
 
 

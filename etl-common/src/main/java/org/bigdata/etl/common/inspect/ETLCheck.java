@@ -1,6 +1,6 @@
 package org.bigdata.etl.common.inspect;
 
-import org.bigdata.etl.common.configs.ExecutorConfig;
+import java.io.Serializable;
 
 /**
  *  配置校验接口
@@ -8,6 +8,6 @@ import org.bigdata.etl.common.configs.ExecutorConfig;
  * Author: GL
  * Date: 2022-04-22
  */
-public interface ETLCheck<C extends ExecutorConfig> {
+public interface ETLCheck<C extends Serializable> {
     boolean check(C config);
 }

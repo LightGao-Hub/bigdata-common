@@ -17,5 +17,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ETLJSONNode implements Serializable {
     private String processType;
-    private Object jsonObject;
+    private Object config;
 }

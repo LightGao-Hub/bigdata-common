@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ETLJSONContext implements Serializable {
     private ETLJSONNode source;
-    private List<ETLJSONNode> middles;
+    private List<ETLJSONNode> transforms;
     private List<ETLJSONNode> sinks;
 }

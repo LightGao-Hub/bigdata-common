@@ -18,7 +18,7 @@ import java.util.Map;
 public class JacksonUtilsTest {
 
     private final String jsonStr = "{\"source\":{\"processType\":\"hdfs\",\"path\":\"/input\"},"
-            + "\"middle\":[{\"processType\":\"dirty\",\"dirtyPath\":\"/dirty\"},{\"processType\":\"dirty2\","
+            + "\"transform\":[{\"processType\":\"dirty\",\"dirtyPath\":\"/dirty\"},{\"processType\":\"dirty2\","
             + "\"dirtyPath\":\"/dirty2\"}],\"sink\":[{\"processType\":\"hdfs\",\"path\":\"/out\"}]}";
 
     private final Map<String, Object> stringObjectMap = JacksonUtils.jsonToMap(jsonStr);
@@ -40,14 +40,14 @@ public class JacksonUtilsTest {
         final Object sourceValue = stringObjectMap.get(ProcessType.SOURCE.getProcessType());
         final ETLJSONNode etlJsonObject = JacksonUtils.convertValue(sourceValue, ETLJSONNode.class);
         assert etlJsonObject != null;
-        etlJsonObject.setJsonObject(sourceValue);
+        etlJsonObject.setConfig(sourceValue);
         log.info("source: {}", etlJsonObject);
     }
 
     @Test
-    public void convertMiddle() {
-        final Object middleValue = stringObjectMap.get(ProcessType.MIDDLE.getProcessType());
-        log.info("middles: {}", getListJsonNode(middleValue));
+    public void converTransform() {
+        final Object transformValue = stringObjectMap.get(ProcessType.TRANSFORM.getProcessType());
+        log.info("transforms: {}", getListJsonNode(transformValue));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class JacksonUtilsTest {
         for (Object value : jsonObjects) {
             ETLJSONNode etlJsonObject = JacksonUtils.convertValue(value, ETLJSONNode.class);
             assert etlJsonObject != null;
-            etlJsonObject.setJsonObject(value);
+            etlJsonObject.setConfig(value);
             list.add(etlJsonObject);
         }
         return list;

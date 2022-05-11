@@ -2,7 +2,7 @@ package org.bigdate.etl.common.scala.test.flink.executors.sink
 
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.bigdata.etl.common.annotations.ETLExecutor
-import org.bigdata.etl.common.configs.{ExecutorConfig, NilExecutorConfig}
+import org.bigdata.etl.common.configs.NilExecutorConfig
 import org.bigdata.etl.common.executors.SinkExecutor
 import org.bigdate.etl.common.scala.test.flink.model.SensorReading
 

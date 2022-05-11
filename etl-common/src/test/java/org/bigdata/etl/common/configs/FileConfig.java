@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * Author: GL
  * Date: 2022-04-22
@@ -11,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileConfig implements ExecutorConfig {
+public class FileConfig implements Serializable {
     private String path;
 }

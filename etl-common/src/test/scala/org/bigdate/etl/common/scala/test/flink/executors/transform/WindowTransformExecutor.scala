@@ -1,11 +1,11 @@
-package org.bigdate.etl.common.scala.test.flink.executors.middle
+package org.bigdate.etl.common.scala.test.flink.executors.transform
 
-import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.bigdata.etl.common.annotations.ETLExecutor
-import org.bigdata.etl.common.configs.{ExecutorConfig, NilExecutorConfig}
-import org.bigdata.etl.common.executors.MiddleExecutor
+import org.bigdata.etl.common.configs.NilExecutorConfig
+import org.bigdata.etl.common.executors.TransformExecutor
 import org.bigdate.etl.common.scala.test.flink.model.SensorReading
 import org.bigdate.etl.common.scala.test.flink.operator.TemperatureAverager
 
@@ -14,7 +14,7 @@ import org.bigdate.etl.common.scala.test.flink.operator.TemperatureAverager
  * Date: 2022-05-07
  */
 @ETLExecutor("window")
-class WindowMiddleExecutor extends MiddleExecutor[StreamExecutionEnvironment, DataStream[SensorReading], DataStream[SensorReading], NilExecutorConfig] {
+class WindowTransformExecutor extends TransformExecutor[StreamExecutionEnvironment, DataStream[SensorReading], DataStream[SensorReading], NilExecutorConfig] {
 
   override def init(engine: StreamExecutionEnvironment, config: NilExecutorConfig): Unit = {
   }
@@ -23,7 +23,7 @@ class WindowMiddleExecutor extends MiddleExecutor[StreamExecutionEnvironment, Da
     val avgTemp: DataStream[SensorReading] = value
       .map(r => SensorReading(r.id, r.timestamp, (r.temperature - 32) * (5.0 / 9.0)))
       .keyBy(_.id)
-      .timeWindow(Time.seconds(1))
+      .window(TumblingEventTimeWindows.of(Time.seconds(3)))
       .apply(new TemperatureAverager)
     avgTemp
   }

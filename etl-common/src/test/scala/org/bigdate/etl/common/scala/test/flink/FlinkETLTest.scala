@@ -11,13 +11,34 @@ import org.junit.Test
 class FlinkETLTest {
 
   private val flink: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
-  private val jsonStr = "{\"source\":{\"processType\":\"sensor\"},\"middle\":[{\"processType\":\"window\"}],\"sink\":[{\"processType\":\"print\"}]}"
+  private val etlStr = """{
+                         |	"source": {
+                         |		"processType": "sensor"
+                         |	},
+                         |	"transform": [{
+                         |		"processType": "window"
+                         |	}],
+                         |	"sink": [{
+                         |		"processType": "print"
+                         |	}]
+                         |}""".stripMargin
+  var etl: ETLContext[StreamExecutionEnvironment] = _
 
   @Test
   @throws[Exception]
   def start(): Unit = {
-    new ETLContext[StreamExecutionEnvironment](classOf[FlinkETLTest], flink, jsonStr)
-    flink.execute("Compute average sensor temperature")
+    try{
+      etl = new ETLContext[StreamExecutionEnvironment](classOf[FlinkETLTest], flink, etlStr)
+      etl.start()
+      flink.execute("Compute average sensor temperature")
+    } catch {
+      case ex: Throwable =>
+        throw ex
+    } finally {
+      if (etl != null) {
+        etl.close()
+      }
+    }
   }
 
 }

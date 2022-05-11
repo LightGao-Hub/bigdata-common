@@ -24,8 +24,7 @@ class FileSourceExecutor extends SourceExecutor[SparkSession, RDD[String], FileC
 
   override def process(engine: SparkSession, config: FileConfig): RDD[String] = {
     log.info("FileSourceExecutor process, config: {}", config)
-    val stringRDD: RDD[String] = engine.sparkContext.textFile(config.path, CommonConstants.SECOND)
-    stringRDD.map(v => v.split(CommonConstants.SPLIT_STRING)(CommonConstants.ZERO))
+    engine.sparkContext.textFile(config.path, CommonConstants.SECOND)
   }
 
   override def close(engine: SparkSession, config: FileConfig): Unit = {

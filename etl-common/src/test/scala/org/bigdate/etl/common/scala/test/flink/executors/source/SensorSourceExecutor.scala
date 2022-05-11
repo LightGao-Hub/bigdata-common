@@ -8,7 +8,7 @@ import org.bigdate.etl.common.scala.test.flink.model.SensorReading
 import org.bigdate.etl.common.scala.test.flink.operator.{SensorGenerator, SensorTimeAssigner}
 
 /**
- *  此source不需要配置
+ *  此source不需要配置config，故使用自带NilExecutorConfig
  *
  * Author: GL
  * Date: 2022-05-07
