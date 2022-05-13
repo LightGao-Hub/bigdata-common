@@ -7,7 +7,7 @@ import org.bigdata.etl.common.inspect.ETLCheck;
 /**
  *  执行器接口
  *  E: engine-计算框架引擎类, 例如SparkContext / FLink-env
- *  O: data-计算框架内部的执行类型, 例如spark的DataFrame / flink的DataStream
+ *  O: SourceExecutor的输出类型，即计算框架内部的执行类型, 例如spark的DataFrame / flink的DataStream
  *  C: config-为此执行器的配置类
  *
  * Author: GL

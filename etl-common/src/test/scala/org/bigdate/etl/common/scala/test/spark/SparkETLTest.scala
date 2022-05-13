@@ -17,7 +17,6 @@ import org.junit.{Before, Test}
  * Date: 2022-04-28
  */
 class SparkETLTest {
-  private var spark: SparkSession = _
   private val inputPath = Objects.requireNonNull(classOf[SparkETLTest].getClassLoader.getResource("input.txt")).getPath
   private val dirtyPath = new File(inputPath).getParent.concat("/dirty")
   private val outPutPath = new File(inputPath).getParent.concat("/out")
@@ -41,7 +40,8 @@ class SparkETLTest {
                            |		}
                            |	}]
                            |}""".stripMargin
-  var etl: ETLContext[SparkSession] = _
+  private var spark: SparkSession = _
+  private var etl: ETLContext[SparkSession] = _
 
 
   @Before

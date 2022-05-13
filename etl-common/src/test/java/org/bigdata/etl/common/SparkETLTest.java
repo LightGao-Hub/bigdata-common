@@ -21,14 +21,17 @@ import java.util.Objects;
 @Slf4j
 public class SparkETLTest {
 
-    private SparkContext sc;
     private final String inputPath = Objects.requireNonNull(SparkETLTest.class.getClassLoader().getResource("input.txt")).getPath();
     private final String outPutPath = new File(inputPath).getParent().concat("/out");
     private final String dirtyPath = new File(inputPath).getParent().concat("/dirty");
     private final String jsonStr = String.format("{\"source\":{\"processType\":\"file\","
-                    + "\"config\":{\"path\":\"%s\"}},\"transform\":[{\"processType\":\"dirty2\",\"config\":{\"dirtyPath\":\"%s\"}},"
+                    + "\"config\":{\"path\":\"%s\"}},\"transform\":[{\"processType\":\"dirty\",\"config\":{\"dirtyPath\":\"%s\"}},"
                     + "{\"processType\":\"schema\"}],\"sink\":[{\"processType\":\"file\",\"config\":{\"path\":\"%s\"}}]}",
             inputPath, dirtyPath, outPutPath);
+
+    private SparkContext sc;
+    private ETLContext<SparkContext> sparkContextETLContext;
+
 
     @Before
     public void init() throws IOException {
@@ -39,12 +42,11 @@ public class SparkETLTest {
 
     @Test
     public void start() throws Exception {
-        ETLContext<SparkContext> sparkContextETLContext = null;
         try {
             sparkContextETLContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
             sparkContextETLContext.start();
         } catch (Throwable ex) {
-            throw ex; // 这块用户可以根据平台的业务进行异常处理
+            throw ex; // 这里用户可以根据平台的业务进行异常处理
         } finally {
             if (sparkContextETLContext != null) {
                 sparkContextETLContext.close();
@@ -54,8 +56,8 @@ public class SparkETLTest {
 
     @Test
     public void stop() throws Exception {
-        final ETLContext<SparkContext> etlContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
-        etlContext.close();
+        sparkContextETLContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
+        sparkContextETLContext.close();
     }
 
 

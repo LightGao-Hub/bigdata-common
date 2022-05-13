@@ -22,7 +22,7 @@ class FlinkETLTest {
                          |		"processType": "print"
                          |	}]
                          |}""".stripMargin
-  var etl: ETLContext[StreamExecutionEnvironment] = _
+  private var etl: ETLContext[StreamExecutionEnvironment] = _
 
   @Test
   @throws[Exception]
