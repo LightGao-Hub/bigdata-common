@@ -20,6 +20,8 @@ import java.util.Set;
 
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.Reflections;
+
 import org.bigdata.etl.common.annotations.ETLExecutor;
 import org.bigdata.etl.common.configs.NilExecutorConfig;
 import org.bigdata.etl.common.enums.ExecutorType;
@@ -38,7 +40,6 @@ import org.bigdata.etl.common.executors.TransformExecutor;
 import org.bigdata.etl.common.model.ETLJSONContext;
 import org.bigdata.etl.common.model.ETLJSONNode;
 import org.bigdata.etl.common.utils.JacksonUtils;
-import org.reflections.Reflections;
 
 /**
  *  ETL上下文构建类, 泛型需和各个接口的实现保持一致

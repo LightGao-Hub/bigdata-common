@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.bigdata.redisson.common.enums.CommonConstants;
 import org.redisson.api.RBucket;
 import org.redisson.api.RDeque;
 import org.redisson.api.RList;
@@ -29,6 +28,8 @@ import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.protocol.ScoredEntry;
+
+import org.bigdata.redisson.common.enums.CommonConstants;
 
 /**
  * redisson单例枚举工具类

@@ -20,7 +20,7 @@
 
 ​	如图1.0: 数据从file文件数据源读取 -> 业务脏数据处理 -> 业务类型转换处理 -> 写入到多个数据汇(es/hbase/hive)
 
-​	![1](/Users/hzxt/project/IDEAlEARNING/bigdata-common/etl-common/picture/1.jpg)
+​	![1](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/1.jpg)
 
 ​														图1.0
 
@@ -607,7 +607,7 @@ ETLContext需要三个参数：当前main函数所在类的class对象，执行�
 
 #### 4.4、ETLContext执行顺序
 
-![2](/Users/hzxt/project/IDEAlEARNING/bigdata-common/etl-common/picture/2.jpg)
+![2](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/2.jpg)
 
 
 
@@ -615,25 +615,11 @@ ETLContext需要三个参数：当前main函数所在类的class对象，执行�
 
 用户创建的程序主类应该放在包名根目录下, 如下：
 
-![3](/Users/hzxt/project/IDEAlEARNING/bigdata-common/etl-common/picture/3.jpg)
+![3](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/3.jpg)
 
 
 
 
-
-### 5、Demo
-
-#### 5.1、java
-
-
-
-#### 5.2、scala
-
-##### 5.2.1、spark
-
-
-
-##### 5.2.2、flink
 
 
 
@@ -656,7 +642,31 @@ mvn -U clean install -DskipTests
 
 然后在项目中依赖etl-common包即可
 
+```xml
+<dependency>
+      <groupId>org.bigdata</groupId>
+      <artifactId>etl-common</artifactId>
+      <version>1.0</version>
+</dependency>
+```
 
+
+
+#### 6.2、Demo
+
+##### 6.2.1、java
+
+[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/SparkETLTest.java](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/SparkETLTest.java)
+
+##### 6.2.2、scala
+
+###### 6.2.2.1、spark
+
+[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/spark/SparkETLTest.scala](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/spark/SparkETLTest.scala)
+
+###### 6.2.2.2、flink
+
+[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala)
 
 
 

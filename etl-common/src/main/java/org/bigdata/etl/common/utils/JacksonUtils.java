@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
-import com.sun.istack.internal.NotNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -107,7 +106,7 @@ public final class JacksonUtils {
 
     // 不应当放在这里 反射可能性能更好
     @Deprecated
-    public static Map<String, Object> toMap(@NotNull Object bean) {
+    public static Map<String, Object> toMap(Object bean) {
         //如果就是String或者相关的类 就按照字符串转换
         if (bean.getClass().isAssignableFrom(String.class)) {
             return jsonToMap(bean.toString());
@@ -121,7 +120,7 @@ public final class JacksonUtils {
         return Collections.emptyMap();
     }
 
-    public static List<Map<String, Object>> toListMap(@NotNull List<?> beanList) {
+    public static List<Map<String, Object>> toListMap(List<?> beanList) {
         try {
             return MAPPER.readValue(MAPPER.writeValueAsBytes(beanList), new TypeReference<List<Map<String, Object>>>() {
             });
@@ -131,7 +130,7 @@ public final class JacksonUtils {
         return Collections.emptyList();
     }
 
-    public static Map<String, Object> jsonToMap(@NotNull String json) {
+    public static Map<String, Object> jsonToMap(String json) {
         try {
             return MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {
             });
@@ -158,7 +157,7 @@ public final class JacksonUtils {
         });
     }*/
     // 反射可能性能更好
-    public static <F, T> T copy(@NotNull F bean, @NotNull Class<T> toClass) {
+    public static <F, T> T copy(F bean, Class<T> toClass) {
         try {
             return MAPPER.readValue(MAPPER.writeValueAsBytes(bean), toClass);
         } catch (Exception e) {
@@ -175,7 +174,7 @@ public final class JacksonUtils {
         return toBeanList;
     }
 
-    public static String toJSONString(@NotNull Object object, boolean prettyPrinter) {
+    public static String toJSONString(Object object, boolean prettyPrinter) {
         try {
             return MAPPER.writer().withDefaultPrettyPrinter().writeValueAsString(object);
         } catch (Exception e) {
@@ -200,7 +199,7 @@ public final class JacksonUtils {
         return null;
     }
 
-    public static String toJSONStringNotNullable(@NotNull Object object) {
+    public static String toJSONStringNotNullable(Object object) {
         try {
             return MAPPER.writer().writeValueAsString(object);
         } catch (Exception e) {
@@ -209,7 +208,7 @@ public final class JacksonUtils {
         return null;
     }
 
-    public static Object fromJSONString(@NotNull String jsonStr, Class<?> className) {
+    public static Object fromJSONString(String jsonStr, Class<?> className) {
         try {
             return MAPPER.readValue(jsonStr, className);
         } catch (Exception e) {
@@ -218,7 +217,7 @@ public final class JacksonUtils {
         return null;
     }
 
-    public Object fromJSONString(@NotNull String jsonStr, TypeReference<?> typeRef) {
+    public Object fromJSONString(String jsonStr, TypeReference<?> typeRef) {
         try {
             return MAPPER.readValue(jsonStr, typeRef);
         } catch (Exception e) {
