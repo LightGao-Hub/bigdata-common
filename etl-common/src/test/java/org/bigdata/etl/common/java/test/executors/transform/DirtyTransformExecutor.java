@@ -1,10 +1,10 @@
-package org.bigdata.etl.common.executors.transform;
+package org.bigdata.etl.common.java.test.executors.transform;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkContext;
 import org.apache.spark.rdd.RDD;
 import org.bigdata.etl.common.annotations.ETLExecutor;
-import org.bigdata.etl.common.configs.DirtyConfig;
+import org.bigdata.etl.common.java.test.configs.DirtyConfig;
 import org.bigdata.etl.common.executors.TransformExecutor;
 
 

@@ -1,4 +1,4 @@
-package org.bigdata.etl.common.configs;
+package org.bigdata.etl.common.java.test.configs;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

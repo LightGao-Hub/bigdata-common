@@ -36,7 +36,7 @@ class FlinkETLTest {
         throw ex
     } finally {
       if (etl != null) {
-        etl.close()
+        etl.stop()
       }
     }
   }

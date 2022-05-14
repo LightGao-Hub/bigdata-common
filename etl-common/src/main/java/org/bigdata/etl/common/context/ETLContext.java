@@ -29,6 +29,7 @@ import org.bigdata.etl.common.enums.ProcessType;
 import org.bigdata.etl.common.exceptions.AnnotationInterfaceMismatchException;
 import org.bigdata.etl.common.exceptions.BuildContextException;
 import org.bigdata.etl.common.exceptions.ETLStartException;
+import org.bigdata.etl.common.exceptions.ETLStopException;
 import org.bigdata.etl.common.exceptions.ExecutorCheckException;
 import org.bigdata.etl.common.exceptions.ExecutorConfigNotFoundException;
 import org.bigdata.etl.common.exceptions.ExecutorProcessTypeNotFoundException;
@@ -68,7 +69,7 @@ public class ETLContext<E> implements Serializable {
             this.etlJson = etlJson;
             this.application = application;
             this.jsonContext = buildExecutor();   // 1、构建项目中所有执行map 2、将etlJson字符串转化成上下文
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new BuildContextException("etlContext build error", e);
         }
     }
@@ -79,13 +80,17 @@ public class ETLContext<E> implements Serializable {
             invokeCheck();
             invokeInit();
             invokeProcess();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new ETLStartException("etl start error", e);
         }
     }
 
-    public void close() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        initOrClose(ExecutorType.CLOSE);
+    public void stop() throws ETLStopException {
+        try {
+            initOrClose(ExecutorType.CLOSE);
+        } catch (Throwable e) {
+            throw new ETLStopException("etl stop error", e);
+        }
     }
 
     private void invokeCheck() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {

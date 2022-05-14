@@ -1,4 +1,4 @@
-package org.bigdata.etl.common;
+package org.bigdata.etl.common.java.test;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -49,7 +49,7 @@ public class SparkETLTest {
             throw ex; // 这里用户可以根据平台的业务进行异常处理
         } finally {
             if (sparkContextETLContext != null) {
-                sparkContextETLContext.close();
+                sparkContextETLContext.stop();
             }
         }
     }
@@ -57,7 +57,7 @@ public class SparkETLTest {
     @Test
     public void stop() throws Exception {
         sparkContextETLContext = new ETLContext<>(SparkETLTest.class, sc, jsonStr);
-        sparkContextETLContext.close();
+        sparkContextETLContext.stop();
     }
 
 

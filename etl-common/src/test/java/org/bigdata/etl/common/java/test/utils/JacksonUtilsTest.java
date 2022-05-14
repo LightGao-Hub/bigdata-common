@@ -1,9 +1,10 @@
-package org.bigdata.etl.common.utils;
+package org.bigdata.etl.common.java.test.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigdata.etl.common.configs.FileConfig;
+import org.bigdata.etl.common.java.test.configs.FileConfig;
 import org.bigdata.etl.common.model.ETLJSONNode;
 import org.bigdata.etl.common.enums.ProcessType;
+import org.bigdata.etl.common.utils.JacksonUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -1,14 +1,11 @@
-package org.bigdata.etl.common.executors.sink;
+package org.bigdata.etl.common.java.test.executors.sink;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkContext;
 import org.apache.spark.rdd.RDD;
 import org.bigdata.etl.common.annotations.ETLExecutor;
-import org.bigdata.etl.common.configs.FileConfig;
+import org.bigdata.etl.common.java.test.configs.FileConfig;
 import org.bigdata.etl.common.executors.SinkExecutor;
-
-import java.util.Collection;
-import java.util.Optional;
 
 
 /**
