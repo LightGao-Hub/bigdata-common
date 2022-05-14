@@ -640,7 +640,7 @@ mvn -U clean install -DskipTests
 
 
 
-然后在项目中依赖etl-common包即可
+然后在项目中依赖etl-common包即可使用
 
 ```xml
 <dependency>
@@ -656,7 +656,7 @@ mvn -U clean install -DskipTests
 
 ##### 6.2.1、java
 
-[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/SparkETLTest.java](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/SparkETLTest.java)
+[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/java/test/SparkETLTest.java](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/java/test/SparkETLTest.java)
 
 ##### 6.2.2、scala
 
