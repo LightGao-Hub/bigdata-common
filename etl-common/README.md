@@ -28,6 +28,8 @@
 
 ### 2、参数设计
 
+#### 2.1、介绍
+
 ​	假设用户创建了四种组件的执行器:hive、hdfs、es、hbase；此时需求是只执行从hive -> hbase的etl，
 
 如何让etl-common知道需求并执行呢？
@@ -81,7 +83,45 @@
 
 此json参数是根据图1.0所设计的json参数
 
-此json中的processType为指定执行器的类型(对应注解参数,详细看3.3)，config则是此执行器所需要的bean类，用户可以根据自己的需求编写不同的config参数
+此json中的processType为指定执行器的类型(对应注解参数,详细看3.4)，config则是此执行器所需要的bean类，用户可以根据自己的需求编写不同的config参数(详细看3.2)
+
+#### 2.2、注意
+
+##### 2.2.1、空transform
+
+若业务中不需要数据中间处理，则可在etlJson中去掉transform，如下：
+
+```json
+{
+	"source": {
+		"processType": "file",
+		"config": {
+			"path": "/input"
+		}
+	},
+	"sink": [{
+			"processType": "hdfs",
+			"config": {
+				"path": "/out"
+			}
+		},
+		{
+			"processType": "es",
+			"config": {
+				"url": "....."
+			}
+		},
+		{
+			"processType": "hive",
+			"config": {
+				"sql": "....."
+			}
+		}
+	]
+}
+```
+
+##### 2.2.2、空config
 
 若业务中不需要config, 可以不传递config, 或config为空，如下:
 
@@ -104,9 +144,11 @@
 }
 ```
 
-**详细看3.3.3**
+**对应的config配置类应该为NilExecutorConfig，详细看3.2.4**
 
 **注意：config配置类需要满足javaBean，实现Serializable接口，且提供无参构造方法及变量的set/get函数**
+
+
 
 ### 3、executor执行器
 
@@ -366,6 +408,8 @@ class FileSinkExecutor extends SinkExecutor[SparkSession, DataFrame, FileConfig]
 ```
 
 
+
+##### 3.2.4、Nil
 
 若用户的executor不需要配置类，则可以使用etl-common中内置的NilExecutorConfig，如下：
 
@@ -667,6 +711,14 @@ mvn -U clean install -DskipTests
 ###### 6.2.2.2、flink
 
 [https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala)
+
+
+
+#### 6.3、注意
+
+由于etl-common中使用了jackson来进行json解析，故在使用时可能会和spark版本或其他计算引擎造成冲突
+
+若有jar包冲突问题，建议通过exclusion剔除对应包后使用
 
 
 
