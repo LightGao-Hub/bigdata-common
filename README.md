@@ -8,6 +8,10 @@
     
     2、sql-parser-common ： SQL语法树解析模块，提供方言解析&自定义方言Demo.
     
+    3、redisson-common ： 基于redisson的redis工具类.
+    
+    4、etl-common ： 可扩展的数据接入(ETL)基础框架.
+    
 #### 运行checkstyle校验
 
 ``` shell
