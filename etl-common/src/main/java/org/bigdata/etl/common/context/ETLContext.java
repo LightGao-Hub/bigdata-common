@@ -135,7 +135,8 @@ public class ETLContext<E> implements Serializable {
         if (Objects.nonNull(transformList)) {
             for (ETLJSONNode transform : transformList) {
                 final TransformExecutor<E, ?, ?, ? extends Serializable> transformExecutor = transformMap.get(transform.getProcessType());
-                final Method transformMethod = transformExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(), transform.getConfig().getClass());
+                final Method transformMethod = transformExecutor.getClass().getMethod(executorType.getExecutorType(), engine.getClass(),
+                        transform.getConfig().getClass());
                 transformMethod.invoke(transformExecutor, engine, transform.getConfig());
                 log.info("transform[{}] {} success ", transform.getProcessType(), executorType.getExecutorType());
             }
@@ -165,7 +166,8 @@ public class ETLContext<E> implements Serializable {
             for (ETLJSONNode transform : transformList) {
                 final TransformExecutor<E, ?, ?, ? extends Serializable> transformExecutor = transformMap.get(transform.getProcessType());
                 final String inputClassName = getConfig(transformExecutor.getClass(), FIRST);
-                final Method transformMethod = transformExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(), Class.forName(inputClassName), transform.getConfig().getClass());
+                final Method transformMethod = transformExecutor.getClass().getMethod(ExecutorType.PROCESS.getExecutorType(), engine.getClass(),
+                        Class.forName(inputClassName), transform.getConfig().getClass());
                 invokeResult = transformMethod.invoke(transformExecutor, engine, invokeResult, transform.getConfig());
                 log.info("transform[{}] process success,  result: {}", transform.getProcessType(), invokeResult);
             }
