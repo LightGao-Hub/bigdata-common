@@ -4,7 +4,10 @@ import static org.bigdata.etl.common.enums.CommonConstants.EMPTY_JSON_STRING;
 import static org.bigdata.etl.common.enums.CommonConstants.EXECUTOR_CHECK;
 import static org.bigdata.etl.common.enums.CommonConstants.FIRST;
 import static org.bigdata.etl.common.enums.CommonConstants.SECOND;
+import static org.bigdata.etl.common.enums.CommonConstants.SINK_CLASS;
+import static org.bigdata.etl.common.enums.CommonConstants.SOURCE_CLASS;
 import static org.bigdata.etl.common.enums.CommonConstants.THIRD;
+import static org.bigdata.etl.common.enums.CommonConstants.TRANSFORM_CLASS;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -228,17 +231,17 @@ public class ETLContext<E> implements Serializable {
             boolean include = false;
             for (Class<?> interfaced : interfaces) {
                 switch (interfaced.getSimpleName()) {
-                    case "SourceExecutor":
+                    case SOURCE_CLASS:
                         sourceMap.put(processType, (SourceExecutor<E, ?, Serializable>) clz.newInstance());
                         executorConfigMap.put(processType, getConfig(clz, SECOND));
                         include = true;
                         break;
-                    case "TransformExecutor":
+                    case TRANSFORM_CLASS:
                         transformMap.put(processType, (TransformExecutor<E, ?, ?, Serializable>) clz.newInstance());
                         executorConfigMap.put(processType, getConfig(clz, THIRD));
                         include = true;
                         break;
-                    case "SinkExecutor":
+                    case SINK_CLASS:
                         sinkMap.put(processType, (SinkExecutor<E, ?, Serializable>) clz.newInstance());
                         executorConfigMap.put(processType, getConfig(clz, SECOND));
                         include = true;

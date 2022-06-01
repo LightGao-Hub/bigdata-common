@@ -13,6 +13,10 @@ public enum CommonConstants {
     public static final String TRANSFORM = "transform";
     public static final String SINK = "sink";
     public static final String PROCESS_TYPE = "processType";
+    public static final String SOURCE_CLASS = "SourceExecutor";
+    public static final String TRANSFORM_CLASS = "TransformExecutor";
+    public static final String SINK_CLASS = "SinkExecutor";
+
 
     public static final String EXECUTOR_CHECK = "check";
     public static final String EXECUTOR_INIT = "init";
