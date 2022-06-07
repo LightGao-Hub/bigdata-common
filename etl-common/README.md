@@ -12,17 +12,23 @@
 
 ​	etl-common框架设计之初是将数据以水流的方式从上到下的流向，故将etl分为了三个部分: source 、transform、sink
 
-​	source是数据源读取，一次etl过程只支持一个source
+![0](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/0.jpg)
+
+
+
+​	source为数据源读取，一次etl过程只支持一个source
 
 ​	transform是数据流的中间操作，常用于业务操作，例如业务中常见的脏数据的处理，就可以用transform进行中间操作，一次etl过程支持多个transform操作，以水流的的方式向下传递
 
 ​	sink是数据汇写入，一次etl过程支持多个sink
 
-​	如图1.0: 数据从file文件数据源读取 -> 业务脏数据处理 -> 业务类型转换处理 -> 写入到多个数据汇(es/hbase/hive)
+​	
+
+例如下图： 
+
+​	数据从file文件数据源读取[file-source] -> 业务脏数据处理[dirty-transform] -> 业务类型转换处理[schema-transform] -> 写入到多个数据汇(es/hbase/hive - sink)
 
 ​	![1](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/1.jpg)
-
-​														图1.0
 
 
 
