@@ -12,6 +12,8 @@
         <module>sql-parser-common</module>
         <module>redisson-common</module>
         <module>etl-common</module>
+        <module>listener-common</module>
+        <module>nlp-sql</module>
     </modules>
     <name>bigdata-common</name>
     <packaging>pom</packaging>
