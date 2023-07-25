@@ -10,7 +10,7 @@
 
 ​    etl-common框架设计之初是将数据以水流的方式从上到下的流向，故将etl分为了三个部分: source 、transform、sink
 
-![0](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/0.jpg)
+![0](https://raw.githubusercontent.com/gaolight/bigdata-common/master/etl-common/picture/0.jpg)
 
 ​    source为数据源读取，一次etl过程只支持一个source
 
@@ -24,7 +24,7 @@
 
 ​    数据从file文件数据源读取[file-source] -> 业务脏数据处理[dirty-transform] -> 业务类型转换处理[schema-transform] -> 写入到多个数据汇(es/hbase/hive - sink)
 
-​    ![1](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/1.jpg)
+​    ![1](https://raw.githubusercontent.com/gaolight/bigdata-common/master/etl-common/picture/1.jpg)
 
 ### 2、参数设计
 
@@ -621,13 +621,13 @@ ETLContext需要三个参数：当前main函数所在类的class对象，执行�
 
 #### 4.4、ETLContext执行顺序
 
-![2](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/2.jpg)
+![2](https://raw.githubusercontent.com/gaolight/bigdata-common/master/etl-common/picture/2.jpg)
 
 #### 4.4、注意
 
 用户创建的程序主类应该放在包名根目录下, 如下：
 
-![3](https://raw.githubusercontent.com/gl0726/bigdata-common/master/etl-common/picture/3.jpg)
+![3](https://raw.githubusercontent.com/gaolight/bigdata-common/master/etl-common/picture/3.jpg)
 
 ### 6、快速使用
 
@@ -639,7 +639,7 @@ ETLContext需要三个参数：当前main函数所在类的class对象，执行�
 # 先打包etl-common项目到maven仓库
 mkdir gitEtl
 cd gitEtl
-git clone https://github.com/gl0726/bigdata-common.git
+git clone https://github.com/gaolight/bigdata-common.git
 cd bigdata-common
 mvn -U clean install -DskipTests
 ```
@@ -658,17 +658,17 @@ mvn -U clean install -DskipTests
 
 ##### 6.2.1、java
 
-[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/java/test/SparkETLTest.java](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/java/test/SparkETLTest.java)
+[https://github.com/gaolight/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/java/test/SparkETLTest.java](https://github.com/gaolight/bigdata-common/blob/master/etl-common/src/test/java/org/bigdata/etl/common/java/test/SparkETLTest.java)
 
 ##### 6.2.2、scala
 
 ###### 6.2.2.1、spark
 
-[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/spark/SparkETLTest.scala](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/spark/SparkETLTest.scala)
+[https://github.com/gaolight/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/spark/SparkETLTest.scala](https://github.com/gaolight/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/spark/SparkETLTest.scala)
 
 ###### 6.2.2.2、flink
 
-[https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala](https://github.com/gl0726/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala)
+[https://github.com/gaolight/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala](https://github.com/gaolight/bigdata-common/blob/master/etl-common/src/test/scala/org/bigdata/etl/common/scala/test/flink/FlinkETLTest.scala)
 
 #### 6.3、注意
 
